@@ -73,6 +73,14 @@ jobs:
         run: |
           pip install _site/app/*.whl
           python validation/browser/check_archives.py e2e-out
+      - name: Publish the result as an annotation
+        if: always()
+        run: |
+          test -f e2e-out/e2e.json && python - <<'PY'
+          import json
+          r = json.load(open("e2e-out/e2e.json"))
+          print("::notice title=browser-e2e result::" + json.dumps(r, separators=(",", ":")).replace("%", "%25").replace("\n", "%0A"))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
