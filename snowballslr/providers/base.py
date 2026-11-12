@@ -16,6 +16,7 @@ import httpx
 from ..determinism.cache import Cache
 from ..errors import ProviderError, RateLimitError
 from ..types import Direction, Work
+from .transport import make_client
 
 __all__ = ["BaseProvider", "FetchResult", "Provider", "RateLimiter", "RetryPolicy"]
 
@@ -100,9 +101,7 @@ class BaseProvider:
             # iteration. Redirect targets stay inside the same API host and the
             # cache is keyed on the *requested* parameters, so following them does
             # not affect determinism.
-            self._client = httpx.Client(
-                timeout=30.0, headers=self.headers(), follow_redirects=True
-            )
+            self._client = make_client(self.headers(), timeout=30.0)
         return self._client
 
     def headers(self) -> dict[str, str]:

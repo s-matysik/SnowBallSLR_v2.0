@@ -16,6 +16,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from .._version import __version__
 from ..config import Config
 from ..determinism.cache import Cache
 from ..determinism.manifest import IterationRecord, RunManifest, hash_obj
@@ -72,7 +73,7 @@ def _rejection_report(
         "observed_values": observed,
     }
 
-_VERSION = "1.0.5"
+_VERSION = __version__
 
 
 class Run:

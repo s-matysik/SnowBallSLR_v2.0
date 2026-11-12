@@ -11,7 +11,16 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
 - `snowballslr.identity.jaro`: pure-Python Jaro-Winkler, bit-equal to rapidfuzz's reference
   implementation on 240,000 comparisons of real titles (`validation/jaro_equality.json`).
 
+- `snowballslr.providers.transport`: provider HTTP clients are built through one function, and a
+  browser transport carries requests over synchronous `XMLHttpRequest` in a Web Worker, dropping
+  the request headers browsers forbid script to set.
+- `snowballslr/_version.py` as the single source of the version, read by the build backend and by
+  the run manifest (v1 kept a second copy in `core/run.py`).
+- Publishing to PyPI through Trusted Publishing (`.github/workflows/publish.yml`, `RELEASING.md`).
+
 ### Changed
+- The test-suite network guard blocks httpx's socket transport rather than `Client.get`, so
+  in-memory transports can be tested; real requests from tests still fail (INV-4).
 - Deduplication and GROBID reference matching use the pure-Python Jaro-Winkler unconditionally.
   The compiled rapidfuzz wheel fuses the Winkler step into a fused multiply-add on arm64, so its
   scores differ from the reference in the last bit on 358 of those 240,000 comparisons and can differ

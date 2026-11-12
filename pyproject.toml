@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "snowballslr"
-version = "1.0.5"
+dynamic = ["version"]
 description = "Deterministic, saturation-aware snowballing for systematic literature reviews"
 readme = "README.md"
 license = { text = "MIT" }
@@ -15,7 +15,7 @@ keywords = [
     "capture-recapture", "reproducibility", "bibliometrics", "openalex",
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
@@ -46,10 +46,21 @@ dev = [
 ]
 all = ["snowballslr[embeddings,loglinear,viz]"]
 
+[tool.hatch.build.targets.sdist]
+# Run outputs and figures support the articles and live in the repository;
+# the source distribution only needs what builds and tests the package.
+exclude = ["cases", "llm_screening", "figures", "notebooks", "validation/*.json"]
+
+[tool.hatch.version]
+path = "snowballslr/_version.py"
+
 [project.urls]
-Homepage = "https://github.com/s-matysik/SnowBallSLR"
-Repository = "https://github.com/s-matysik/SnowBallSLR"
-Issues = "https://github.com/s-matysik/SnowBallSLR/issues"
+Homepage = "https://github.com/s-matysik/SnowBallSLR_v2.0"
+Repository = "https://github.com/s-matysik/SnowBallSLR_v2.0"
+Issues = "https://github.com/s-matysik/SnowBallSLR_v2.0/issues"
+Changelog = "https://github.com/s-matysik/SnowBallSLR_v2.0/blob/main/CHANGELOG.md"
+"Version 1" = "https://github.com/s-matysik/SnowBallSLR/releases/tag/v1.0.5"
+"Version 1 article" = "https://doi.org/10.1016/j.softx.2026.103116"
 
 [project.scripts]
 snowballslr = "snowballslr.cli:cli"

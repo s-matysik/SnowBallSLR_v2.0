@@ -24,8 +24,7 @@ Quickstart::
 
 from __future__ import annotations
 
-__version__ = "1.0.5"
-
+from ._version import __version__
 from .config import Config
 from .core.run import Run
 from .core.state import Phase, RunState

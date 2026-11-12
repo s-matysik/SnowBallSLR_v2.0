@@ -24,8 +24,10 @@ def no_network(monkeypatch):
     def _blocked(*args, **kwargs):
         raise AssertionError("network access attempted in tests (INV-4 violated)")
 
-    monkeypatch.setattr(httpx.Client, "get", _blocked)
-    monkeypatch.setattr(httpx.Client, "post", _blocked)
+    # Block at the socket transport, the only place a request can leave the
+    # machine. Blocking Client.get would also block in-memory transports such as
+    # the browser XHR transport under test, which never touch the network.
+    monkeypatch.setattr(httpx.HTTPTransport, "handle_request", _blocked)
     monkeypatch.setattr(httpx, "get", _blocked)
     monkeypatch.setattr(httpx, "post", _blocked)
 
