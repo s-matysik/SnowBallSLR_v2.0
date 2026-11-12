@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SnowBallSLR, run it in your browser</title>
+<meta name="description" content="Saturation-aware, reproducible citation searching for systematic reviews. Runs entirely in your browser: nothing to install, and your screening decisions never leave your machine.">
+<meta name="color-scheme" content="light dark">
+<style>
+:root{
+  --bg:#f6f8fc; --surface:#fff; --ink:#0b1220; --ink-2:#44536b; --ink-3:#7988a0;
+  --line:rgba(14,25,45,.10); --brand:#4f46e5; --brand-soft:rgba(79,70,229,.08);
+  --ok:#047857; --ok-soft:rgba(4,120,87,.10); --warn:#b45309; --warn-soft:rgba(180,83,9,.10);
+  --err:#b91c1c; --err-soft:rgba(185,28,28,.09); --r:14px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0b1020; --surface:#121a2e; --ink:#e7ecf6; --ink-2:#a9b5cc; --ink-3:#7c88a3;
+  --line:rgba(255,255,255,.10); --brand:#818cf8; --brand-soft:rgba(129,140,248,.12);
+  --ok:#34d399; --ok-soft:rgba(52,211,153,.12); --warn:#fbbf24; --warn-soft:rgba(251,191,36,.12);
+  --err:#f87171; --err-soft:rgba(248,113,113,.12);}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:64rem;margin:0 auto;padding:1.5rem 1rem 4rem}
+h1{font-size:1.55rem;margin:.2rem 0 .3rem;letter-spacing:-.01em} h2{font-size:1.1rem;margin:0 0 .6rem}
+p{margin:.35rem 0} a{color:var(--brand)} small,.hint{color:var(--ink-2)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.2rem;margin:1rem 0}
+.row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem}
+label{display:block;font-weight:600;font-size:.88rem;margin:.6rem 0 .25rem}
+label.inline{display:inline;font-weight:400;margin:0}
+input[type=text],input[type=email],input[type=password],input[type=number],textarea{width:100%;font:inherit;padding:.5rem .6rem;border:1px solid var(--line);border-radius:9px;background:transparent;color:inherit}
+textarea{font-family:var(--mono);font-size:.85rem;min-height:7rem}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.5rem .95rem;border-radius:9px;cursor:pointer}
+button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.inc[aria-pressed=true]{background:var(--ok);border-color:var(--ok);color:#fff}
+button.exc[aria-pressed=true]{background:var(--err);border-color:var(--err);color:#fff}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap}
+.tabs button[aria-selected=true]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.badge{display:inline-block;font-size:.75rem;font-weight:700;padding:.12rem .5rem;border-radius:99px;background:var(--brand-soft);color:var(--brand)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)} .badge.warn{background:var(--warn-soft);color:var(--warn)} .badge.err{background:var(--err-soft);color:var(--err)}
+.bar{height:6px;border-radius:9px;background:var(--line);overflow:hidden;margin:.6rem 0} .bar i{display:block;height:100%;width:0;background:var(--brand);transition:width .3s}
+.steps{list-style:none;padding:0;margin:.4rem 0;color:var(--ink-3)} .steps li.done{color:var(--ok)} .steps li.active{color:var(--ink);font-weight:600}
+.cand{border-top:1px solid var(--line);padding:.75rem 0;display:grid;grid-template-columns:2.4rem 1fr auto;gap:.7rem;align-items:start}
+.cand:first-child{border-top:0} .cand.focus{outline:2px solid var(--brand);outline-offset:4px;border-radius:6px}
+.rank{font-family:var(--mono);color:var(--ink-3);font-size:.85rem;text-align:right;padding-top:.15rem}
+.title{font-weight:600} .meta{color:var(--ink-2);font-size:.86rem}
+.abs{color:var(--ink-2);font-size:.88rem;margin-top:.35rem;display:none} .cand.open .abs{display:block}
+.choice{display:flex;gap:.35rem}
+table{width:100%;border-collapse:collapse;font-size:.88rem} th,td{text-align:left;padding:.4rem .5rem;border-top:1px solid var(--line);vertical-align:top}
+th{color:var(--ink-2);font-weight:600}
+.mono{font-family:var(--mono);font-size:.82rem;word-break:break-all}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:1.4rem;text-align:center;color:var(--ink-2)}
+.drop.over{border-color:var(--brand);background:var(--brand-soft)}
+.log{font-family:var(--mono);font-size:.78rem;color:var(--ink-3);max-height:7rem;overflow:auto;margin-top:.5rem}
+.log .err{color:var(--err)}
+.hidden{display:none!important}
+.sticky{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:.7rem 0 .2rem;margin-top:.6rem}
+kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 .3rem}
+#prisma svg{max-width:100%;height:auto;background:#fff;border-radius:8px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="badge">SnowBallSLR <span id="ver">2</span></span>
+    <h1>Citation searching for systematic reviews, in your browser</h1>
+    <p class="hint">Backward and forward snowballing that stops on a recorded rule, reports how much it may still be
+      missing, and produces a run archive anyone can verify. Nothing to install. Your screening decisions stay on
+      this machine; the only traffic is queries to OpenAlex and Crossref.
+      Version 1 is described in <a href="https://doi.org/10.1016/j.softx.2026.103116">SoftwareX 36 (2026) 103116</a>;
+      a review started here continues unchanged on the <a href="https://github.com/s-matysik/SnowBallSLR_v2.0">command line</a>.</p>
+  </header>
+
+  <section class="card" id="boot">
+    <div class="row"><span class="badge" id="bootBadge">Starting</span><strong id="bootTitle">Preparing the Python runtime</strong></div>
+    <p class="hint">The first visit downloads the interpreter and scientific libraries (about 25 MB). Later visits start from the browser cache.</p>
+    <div class="bar"><i id="bar"></i></div>
+    <ul class="steps" id="steps">
+      <li>WebAssembly Python runtime</li><li>Numerical libraries</li><li>SnowBallSLR package</li></ul>
+    <div class="log" id="log" aria-live="polite"></div>
+  </section>
+
+  <nav class="tabs hidden" id="tabs" role="tablist">
+    <button role="tab" data-tab="start" aria-selected="true">New review</button>
+    <button role="tab" data-tab="resume" aria-selected="false">Continue a review</button>
+    <button role="tab" data-tab="verify" aria-selected="false">Verify a review</button>
+  </nav>
+
+  <section class="card hidden" id="tab-start">
+    <h2>Start a review</h2>
+    <p class="hint">Paste the DOIs (or OpenAlex IDs) of studies you already know belong in the review, one per line.
+      New to this? <button id="demoBtn" type="button">Try the offline demo</button></p>
+    <label for="seeds">Seed studies</label>
+    <textarea id="seeds" placeholder="10.1145/2601248.2601268&#10;10.1186/s13643-020-01521-4"></textarea>
+    <div class="grid">
+      <div><label for="email">Your e-mail (passed to the APIs as a polite-pool contact)</label>
+        <input type="email" id="email" autocomplete="email" placeholder="optional, recommended"></div>
+      <div><label for="oakey">OpenAlex API key</label>
+        <input type="password" id="oakey" autocomplete="off" placeholder="free at openalex.org/settings/api">
+        <small>Needed to follow highly cited studies forward. Held in memory for this tab only and never written into the run.</small></div>
+    </div>
+    <div class="grid">
+      <div><label>Directions</label>
+        <div class="row"><label class="inline"><input type="checkbox" id="dirB" checked> backward (references)</label>
+        <label class="inline"><input type="checkbox" id="dirF" checked> forward (citations)</label></div></div>
+      <div><label for="maxit">Maximum iterations</label><input type="number" id="maxit" value="6" min="1" max="20"></div>
+      <div><label for="budget">Screening budget (records, optional)</label><input type="number" id="budget" min="1" placeholder="no limit"></div>
+    </div>
+    <p class="hint">The review stops when new inclusions dry up (fewer than 1 per 100 screened for two iterations), when
+      the budget is reached, or when nothing is left to follow. A recall estimate is reported at every iteration as a
+      diagnostic; it does not end the review.</p>
+    <div class="row" style="margin-top:.8rem"><button class="primary" id="startBtn" disabled>Find candidates</button></div>
+  </section>
+
+  <section class="card hidden" id="tab-resume">
+    <h2>Continue a review</h2>
+    <p class="hint">Open a <span class="mono">run.zip</span> saved from this page, or a zipped command-line run directory.</p>
+    <div class="drop" id="resumeDrop">Drop run.zip here, or <button type="button" id="resumePick">choose a file</button></div>
+    <div id="savedBox" class="hidden" style="margin-top:.8rem"><p>A review is saved in this browser: <span id="savedInfo"></span></p>
+      <div class="row"><button id="savedOpen" class="primary">Open it</button><button id="savedDrop">Discard</button></div></div>
+  </section>
+
+  <section class="card hidden" id="tab-verify">
+    <h2>Verify a review</h2>
+    <p class="hint">For peer reviewers and editors. Replays the review from the API responses archived inside it,
+      recomputes every output and compares each with the hash recorded when it was produced. No network access is used.</p>
+    <div class="drop" id="verifyDrop">Drop run.zip here, or <button type="button" id="verifyPick">choose a file</button></div>
+    <div id="verifyOut"></div>
+  </section>
+
+  <section class="card hidden" id="screen">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">Iteration <span id="itNo"></span>: screen <span id="nCand"></span> candidates</h2>
+      <span class="hint"><kbd>J</kbd>/<kbd>K</kbd> move, <kbd>I</kbd> include, <kbd>E</kbd> exclude, <kbd>A</kbd> abstract</span></div>
+    <p class="hint">Ranked by similarity to what you have included so far. Records left undecided stay unscreened.</p>
+    <div id="cands"></div>
+    <div class="sticky row" style="justify-content:space-between">
+      <span id="tally" class="hint"></span>
+      <div class="row"><button id="restExc">Exclude all undecided</button><button class="primary" id="submitBtn">Submit decisions</button></div></div>
+  </section>
+
+  <section class="card hidden" id="state">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0" id="stateTitle"></h2><span id="stateBadge"></span></div>
+    <div class="grid" style="margin:.6rem 0" id="stats"></div>
+    <h2 style="font-size:1rem;margin-top:1rem">Stopping rules at this iteration</h2>
+    <table><thead><tr><th>Rule</th><th>Status</th><th>Value</th><th>Rationale</th></tr></thead><tbody id="rules"></tbody></table>
+    <div class="row" style="margin-top:1rem">
+      <button class="primary" id="nextBtn">Next iteration</button>
+      <button id="zipBtn">Download run.zip</button>
+      <button id="reportBtn">Report and PRISMA diagram</button></div>
+    <div id="reportOut"></div>
+  </section>
+  <input type="file" id="filePick" accept=".zip,application/zip" class="hidden">
+</main>
+
+<script id="worker-src" type="text/plain">
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyodide.js");
+let py = null;
+const post = (m) => self.postMessage(m);
+async function boot(wheelName, wheelBytes){
+  post({progress: 0, msg: "starting the WebAssembly interpreter"});
+  py = await loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/"});
+  post({progress: 1, msg: "loading numpy, scipy, networkx, pydantic, httpx"});
+  await py.loadPackage(["numpy", "scipy", "networkx", "pydantic", "pyyaml", "httpx", "micropip"]);
+  post({progress: 2, msg: "installing SnowBallSLR"});
+  // The page fetched the wheel and passed its bytes, so installation does not depend on how
+  // the hosting server treats requests made from a worker. deps=False: every runtime
+  // dependency is loaded above; typer is needed by the command line only.
+  const path = "/tmp/" + wheelName; py.FS.writeFile(path, wheelBytes);
+  await py.runPythonAsync(`import micropip\nawait micropip.install("emfs:${path}", deps=False)`);
+  py.runPython("import json, os\nfrom snowballslr import __version__\nfrom snowballslr.web import Session, verify_archive\nS = Session('/home/pyodide/work')");
+  return py.runPython("__version__");
+}
+function lastLine(e){ const s = String(e && e.message || e).trim().split("\n"); return s[s.length-1]; }
+self.onmessage = async (ev) => {
+  const {id, cmd, args, bytes} = ev.data;
+  try {
+    let result;
+    if (cmd === "boot") result = await boot(args.wheel, bytes);
+    else if (cmd === "setKey") {
+      py.globals.set("_k", args.key || "");
+      py.runPython("os.environ['OPENALEX_API_KEY'] = _k\nif not _k: os.environ.pop('OPENALEX_API_KEY', None)\ndel _k");
+      result = true;
+    } else if (cmd === "export") {
+      const p = py.runPython("S.export_zip()"); result = p.toJs(); p.destroy();
+      self.postMessage({id, ok: true, result}, [result.buffer]); return;
+    } else if (cmd === "import" || cmd === "verify") {
+      py.globals.set("_b", bytes); py.globals.set("_g", args && args.graph ? JSON.stringify(args.graph) : "");
+      const code = cmd === "import"
+        ? "json.dumps(S.import_zip(bytes(_b.to_py()), offline_graph=(json.loads(_g) if _g else None)), default=str)"
+        : "json.dumps(verify_archive(bytes(_b.to_py())), default=str)";
+      result = JSON.parse(py.runPython(code));
+    } else {
+      py.globals.set("_a", JSON.stringify({cmd, args: args || {}}));
+      result = JSON.parse(py.runPython("_a = json.loads(_a)\njson.dumps(getattr(S, _a['cmd'])(**_a['args']), default=str)"));
+    }
+    post({id, ok: true, result});
+  } catch (e) { post({id, ok: false, error: lastLine(e), detail: String(e && e.message || e)}); }
+};
+</script>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function log(msg, cls){ const d = document.createElement("div"); if (cls) d.className = cls; d.textContent = msg; $("log").appendChild(d); $("log").scrollTop = 1e9; }
+
+// ---- worker bridge: the page holds no review logic; everything runs in snowballslr.web ----
+const worker = new Worker(URL.createObjectURL(new Blob([$("worker-src").textContent], {type: "text/javascript"})));
+let seq = 0; const waiting = new Map();
+worker.onmessage = (ev) => {
+  const m = ev.data;
+  if (m.progress !== undefined){ const li = $("steps").children;
+    for (let i = 0; i < li.length; i++) li[i].className = i < m.progress ? "done" : i === m.progress ? "active" : "";
+    $("bar").style.width = (m.progress / 3 * 100) + "%"; log(m.msg); return; }
+  const w = waiting.get(m.id); if (!w) return; waiting.delete(m.id);
+  m.ok ? w.resolve(m.result) : w.reject(Object.assign(new Error(m.error), {detail: m.detail}));
+};
+function call(cmd, args, bytes){
+  return new Promise((resolve, reject) => { const id = ++seq; waiting.set(id, {resolve, reject});
+    const msg = {id, cmd, args}; if (bytes){ msg.bytes = bytes; worker.postMessage(msg, [bytes.buffer]); } else worker.postMessage(msg); });
+}
+let busy = false;
+async function guarded(label, fn){
+  if (busy) return; busy = true; document.body.style.cursor = "progress"; log(label);
+  try { return await fn(); }
+  catch (e) { log("error: " + e.message, "err"); alert(friendly(e.message)); console.error(e.detail || e); }
+  finally { busy = false; document.body.style.cursor = ""; }
+}
+function friendly(msg){
+  if (/cursor= needs a free API key|HTTP 401/.test(msg)) return "OpenAlex needs an API key to page through a highly cited study. A free key takes a minute at openalex.org/settings/api; paste it into the OpenAlex API key field and press Next iteration again. Responses already received are kept.\n\n" + msg;
+  if (/status 0|CORS|NetworkError|transport failure/.test(msg)) return "A bibliographic API could not be reached. Check your connection and try again; responses already received are kept in the run.\n\n" + msg;
+  return msg;
+}
+
+// ---- autosave in IndexedDB --------------------------------------------------------
+const DB = () => new Promise((res, rej) => { const r = indexedDB.open("snowballslr", 1);
+  r.onupgradeneeded = () => r.result.createObjectStore("runs"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function idb(mode, fn){ const db = await DB(); return new Promise((res, rej) => {
+  const tx = db.transaction("runs", mode); const r = fn(tx.objectStore("runs")); tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); }); }
+let demoGraph = null;
+async function autosave(st){
+  if (demoGraph) return;
+  try { const z = await call("export");
+    await idb("readwrite", s => s.put({zip: z, iteration: st.iteration, included: st.included, saved: new Date().toISOString()}, "current")); }
+  catch (e) { log("autosave skipped: " + e.message); }
+}
+
+// ---- tabs ------------------------------------------------------------------------
+function showTab(t){ for (const b of $("tabs").children) b.setAttribute("aria-selected", b.dataset.tab === t);
+  for (const n of ["start", "resume", "verify"]) $("tab-" + n).classList.toggle("hidden", n !== t); }
+function hideTabs(){ for (const n of ["start", "resume", "verify"]) $("tab-" + n).classList.add("hidden"); }
+$("tabs").addEventListener("click", e => { if (e.target.dataset.tab) showTab(e.target.dataset.tab); });
+
+// ---- start ---------------------------------------------------------------------------
+function buildConfig(){
+  const dirs = [$("dirB").checked && "backward", $("dirF").checked && "forward"].filter(Boolean);
+  if (!dirs.length) throw new Error("choose at least one direction");
+  const email = $("email").value.trim() || null;
+  const rules = [{type: "marginal_yield", eps: 0.01, k: 2}, {type: "exhaustion"}, {type: "estimated_recall", tau: 0.95}];
+  const b = parseInt($("budget").value, 10); if (b > 0) rules.push({type: "budget", max_screened: b});
+  return {run: {directions: dirs, max_iterations: parseInt($("maxit").value, 10) || 6},
+          providers: {openalex: {mailto: email}, crossref: {mailto: email}},
+          stopping: {mode: "any_of", rules}};
+}
+$("startBtn").onclick = () => guarded("resolving the seed studies", async () => {
+  const seeds = $("seeds").value; if (!seeds.trim()) throw new Error("paste at least one DOI");
+  await call("setKey", {key: $("oakey").value.trim()});
+  const args = {seeds, config: buildConfig()}; if (demoGraph) args.offline_graph = demoGraph;
+  const st = await call("new", args);
+  log(`${st.seeds} of ${st.seeds_requested} seeds resolved`);
+  if (!st.seeds) throw new Error("none of the seeds could be resolved; check the identifiers");
+  await nextIteration();
+});
+$("demoBtn").onclick = () => guarded("loading the offline demo", async () => {
+  demoGraph = await (await fetch("demo/mini_graph.json")).json();
+  const keys = (await (await fetch("demo/mini_gold.csv")).text()).trim().split("\n").slice(1).map(s => s.trim()).filter(Boolean);
+  $("seeds").value = keys.sort().slice(0, 3).join("\n");
+  log("demo: a small frozen citation graph, no network. Records whose DOI contains 'gold' are the relevant ones. Press Find candidates.");
+});
+
+// ---- screening ---------------------------------------------------------------------------
+let cands = [], decisions = {}, focus = 0;
+async function nextIteration(){
+  await call("setKey", {key: $("oakey").value.trim()});
+  const out = await call("step");
+  if (out.stopped || !out.candidates.length){ hideTabs(); renderState(out); return; }
+  cands = out.candidates; decisions = {}; focus = 0;
+  $("itNo").textContent = out.iteration; $("nCand").textContent = cands.length;
+  $("cands").innerHTML = cands.map((c, i) => `
+    <div class="cand" data-i="${i}">
+      <div class="rank">${c.rank}</div>
+      <div><div class="title">${esc(c.title || "(untitled)")}${c.is_retracted ? ' <span class="badge err">retracted</span>' : ""}</div>
+        <div class="meta">${esc(c.authors.join("; "))}${c.n_authors > c.authors.length ? " et al." : ""} · ${c.year ?? "n.d."}${c.venue ? " · " + esc(c.venue) : ""}
+          · found via ${esc(c.directions.join(" + "))}${c.doi ? ` · <a href="https://doi.org/${esc(c.doi)}" target="_blank" rel="noopener">doi</a>` : ""}</div>
+        <div class="abs">${esc(c.abstract || "No abstract available.")}</div></div>
+      <div class="choice"><button class="inc" aria-pressed="false" data-d="include">Include</button><button class="exc" aria-pressed="false" data-d="exclude">Exclude</button></div>
+    </div>`).join("");
+  hideTabs(); $("screen").classList.remove("hidden"); $("state").classList.add("hidden");
+  setFocus(0); tally(); $("screen").scrollIntoView({behavior: "smooth"});
+}
+function decide(i, d){ const c = cands[i]; decisions[c.key] = decisions[c.key] === d ? undefined : d;
+  const el = $("cands").children[i]; el.querySelector(".inc").setAttribute("aria-pressed", decisions[c.key] === "include");
+  el.querySelector(".exc").setAttribute("aria-pressed", decisions[c.key] === "exclude"); tally(); }
+function setFocus(i){ const ch = $("cands").children; if (!ch.length) return; focus = Math.max(0, Math.min(ch.length - 1, i));
+  for (const e of ch) e.classList.remove("focus"); ch[focus].classList.add("focus"); ch[focus].scrollIntoView({block: "nearest"}); }
+function tally(){ const v = Object.values(decisions); const inc = v.filter(x => x === "include").length, exc = v.filter(x => x === "exclude").length;
+  $("tally").textContent = `${inc} included, ${exc} excluded, ${cands.length - inc - exc} undecided`; }
+$("cands").addEventListener("click", e => { const row = e.target.closest(".cand"); if (!row) return; const i = +row.dataset.i;
+  if (e.target.dataset.d) decide(i, e.target.dataset.d); else if (!e.target.closest("a")) row.classList.toggle("open"); setFocus(i); });
+document.addEventListener("keydown", e => {
+  if ($("screen").classList.contains("hidden") || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === "j") setFocus(focus + 1); else if (k === "k") setFocus(focus - 1);
+  else if (k === "i") { decide(focus, "include"); setFocus(focus + 1); } else if (k === "e") { decide(focus, "exclude"); setFocus(focus + 1); }
+  else if (k === "a") $("cands").children[focus].classList.toggle("open"); else return;
+  e.preventDefault(); });
+$("restExc").onclick = () => { cands.forEach((c, i) => { if (!decisions[c.key]) decide(i, "exclude"); }); };
+$("submitBtn").onclick = () => guarded("recording decisions and evaluating the stopping rules", async () => {
+  const d = Object.fromEntries(Object.entries(decisions).filter(([, v]) => v));
+  if (!Object.keys(d).length) throw new Error("decide at least one record before submitting");
+  const st = await call("label", {decisions: d});
+  await autosave(st); renderState(st);
+});
+
+// ---- state, rules and report ----------------------------------------------------------------
+const RULE_NAMES = {marginal_yield: "Marginal yield", asymptotic_coverage: "Asymptotic coverage", estimated_recall: "Estimated recall",
+  budget: "Screening budget", exhaustion: "Frontier exhausted", max_iterations: "Iteration limit"};
+const fmt = (v) => v === null || v === undefined ? "" : typeof v === "number" ? (Math.abs(v) < 10 ? v.toFixed(3) : v.toFixed(1)) : esc(v);
+function renderState(st){
+  $("screen").classList.add("hidden"); $("state").classList.remove("hidden");
+  $("stateTitle").textContent = st.stopped ? "Review complete" : `After iteration ${st.iteration}`;
+  $("stateBadge").innerHTML = st.stopped ? `<span class="badge ok">stopped: ${esc(RULE_NAMES[st.stopped_by] || st.stopped_by)}</span>` : `<span class="badge">continuing</span>`;
+  $("stats").innerHTML = [["Seeds", st.seeds], ["Screened", st.screened], ["Included", st.included], ["Iterations", st.iteration]]
+    .map(([k, v]) => `<div><small>${k}</small><div style="font-size:1.35rem;font-weight:700">${v}</div></div>`).join("");
+  $("rules").innerHTML = (st.decisions || []).map(d => {
+    const adv = d.detail && d.detail.advisory;
+    const badge = d.triggered ? (adv ? '<span class="badge warn">met, advisory</span>' : '<span class="badge ok">met</span>') : '<span class="badge">not met</span>';
+    return `<tr><td>${esc(RULE_NAMES[d.rule] || d.rule)}</td><td>${badge}</td><td class="mono">${fmt(d.value)}${d.threshold != null ? " / " + fmt(d.threshold) : ""}</td><td>${esc(d.rationale)}</td></tr>`;
+  }).join("") || `<tr><td colspan="4" class="hint">Rules are evaluated once the first iteration has been screened.</td></tr>`;
+  $("nextBtn").classList.toggle("hidden", st.stopped);
+  $("state").scrollIntoView({behavior: "smooth"});
+}
+$("nextBtn").onclick = () => guarded("expanding the frontier", nextIteration);
+function download(name, data, type){ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], {type})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+$("zipBtn").onclick = () => guarded("packing the run", async () => download("run.zip", await call("export"), "application/zip"));
+$("reportBtn").onclick = () => guarded("writing the report", async () => {
+  const rep = await call("report", {});
+  let est = null; try { est = await call("estimate"); } catch (e) { est = {error: e.message}; }
+  const files = Object.keys(rep).filter(k => rep[k] !== null);
+  const estText = est && est.recall != null && est.n_hat != null
+    ? `${(est.recall * 100).toFixed(1)}% of an estimated ${Number(est.n_hat).toFixed(0)} eligible records (nominal interval uncalibrated; see the report)`
+    : esc((est && (est.reason || est.error || (est.warnings || []).join("; "))) || "not estimable with these sources");
+  $("reportOut").innerHTML = `<h2 style="font-size:1rem;margin-top:1.2rem">PRISMA 2020, citation searching</h2><div id="prisma">${rep["prisma.svg"] || ""}</div>
+    <p class="hint">Recall estimate (a diagnostic, not a stopping criterion): ${estText}</p>
+    <div class="row">${files.map(f => `<button data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>`;
+  $("reportOut").querySelectorAll("button[data-f]").forEach(b => b.onclick = () => download(b.dataset.f, rep[b.dataset.f], b.dataset.f.endsWith(".svg") ? "image/svg+xml" : "text/plain"));
+  await autosave(await call("status"));
+});
+
+// ---- continue and verify -----------------------------------------------------------------------
+async function readFile(f){ return new Uint8Array(await f.arrayBuffer()); }
+function wireDrop(el, pickBtn, onFile){
+  el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("over"); });
+  el.addEventListener("dragleave", () => el.classList.remove("over"));
+  el.addEventListener("drop", e => { e.preventDefault(); el.classList.remove("over"); if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); });
+  pickBtn.onclick = () => { $("filePick").onchange = () => { if ($("filePick").files[0]) onFile($("filePick").files[0]); $("filePick").value = ""; }; $("filePick").click(); };
+}
+async function openZip(bytes){ demoGraph = null; const st = await call("import", {}, bytes); log(`opened a review at iteration ${st.iteration}`);
+  await autosave(st); hideTabs(); renderState(st); }
+wireDrop($("resumeDrop"), $("resumePick"), f => guarded("opening " + f.name, async () => openZip(await readFile(f))));
+wireDrop($("verifyDrop"), $("verifyPick"), f => guarded("verifying " + f.name, async () => {
+  const r = await call("verify", {}, await readFile(f));
+  const mm = r.artifacts_mismatched || [];
+  $("verifyOut").innerHTML = `<p style="margin-top:1rem"><span class="badge ${r.ok ? "ok" : "err"}">${r.ok ? "verified" : "NOT verified"}</span>
+    ${r.ok ? `All ${r.artifacts_checked} recorded outputs were recomputed from the archived responses and match their hashes.`
+           : esc(r.error || `${mm.length} of ${r.artifacts_checked} outputs do not match.`)}</p>
+    <table><tbody>
+      <tr><th>File</th><td class="mono">${esc(f.name)}</td></tr>
+      ${r.run ? `<tr><th>Produced by</th><td>SnowBallSLR ${esc(r.run.snowballslr_version)}; verified with ${esc(r.run.verified_with)}</td></tr>
+      <tr><th>Seeds, iterations</th><td>${r.run.seeds}, ${r.run.iterations}</td></tr>
+      <tr><th>Configuration hash</th><td class="mono">${esc(r.run.config_hash)}</td></tr>` : ""}
+      <tr><th>Run started</th><td>${esc(r.original_run_started || "")}</td></tr>
+      ${mm.length ? `<tr><th>Mismatched</th><td class="mono">${mm.map(esc).join("<br>")}</td></tr>` : ""}
+      ${r.config_drift ? `<tr><th>Configuration</th><td>${esc(r.config_drift)}</td></tr>` : ""}
+    </tbody></table>`;
+}));
+async function refreshSaved(){
+  let s = null; try { s = await idb("readonly", st => st.get("current")); } catch (e) {}
+  $("savedBox").classList.toggle("hidden", !s);
+  if (s) $("savedInfo").textContent = `iteration ${s.iteration}, ${s.included} included, saved ${new Date(s.saved).toLocaleString()}`;
+  return s;
+}
+$("savedOpen").onclick = () => guarded("opening the saved review", async () => { const s = await refreshSaved(); if (s) await openZip(new Uint8Array(s.zip)); });
+$("savedDrop").onclick = async () => { if (confirm("Discard the review saved in this browser? Download run.zip first if you need it.")) { await idb("readwrite", s => s.delete("current")); refreshSaved(); } };
+
+// ---- boot ---------------------------------------------------------------------------------------
+(async () => {
+  try {
+    const meta = await (await fetch("wheel.json", {cache: "no-store"})).json();
+    const wr = await fetch(meta.wheel); if (!wr.ok) throw new Error("could not download " + meta.wheel + " (HTTP " + wr.status + ")");
+    const v = await call("boot", {wheel: meta.wheel}, new Uint8Array(await wr.arrayBuffer()));
+    $("ver").textContent = v; $("bootBadge").className = "badge ok"; $("bootBadge").textContent = "Ready";
+    $("bootTitle").textContent = "Runtime ready: SnowBallSLR " + v; $("bar").style.width = "100%";
+    for (const li of $("steps").children) li.className = "done";
+    $("tabs").classList.remove("hidden"); $("startBtn").disabled = false;
+    const saved = await refreshSaved();
+    const q = new URLSearchParams(location.search);
+    showTab(q.get("mode") === "verify" ? "verify" : saved ? "resume" : "start");
+  } catch (e) {
+    $("bootBadge").className = "badge err"; $("bootBadge").textContent = "Failed"; $("bootTitle").textContent = "The runtime could not start";
+    log(String(e.message || e), "err");
+  }
+})();
+</script>
+</body>
+</html>

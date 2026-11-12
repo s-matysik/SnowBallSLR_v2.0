@@ -4,10 +4,9 @@
 """
 import json
 import sys
-
-KEYS = ("config_hash", "stopped_by", "outputs", "iterations", "candidate_order", "estimate")
 from pathlib import Path
 
+KEYS = ("config_hash", "stopped_by", "outputs", "iterations", "candidate_order", "estimate")
 a, b = (json.loads(Path(p).read_text()) for p in sys.argv[1:3])
 res = {
     "cpython": {"runtime": a["runtime"], "python": a["python"]},

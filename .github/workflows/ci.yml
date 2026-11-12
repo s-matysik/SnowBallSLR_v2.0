@@ -55,3 +55,26 @@ jobs:
           npm install --no-save pyodide@0.28.3
           node run_pyodide.mjs $GITHUB_WORKSPACE/dist/*.whl $GITHUB_WORKSPACE/tests/fixtures /tmp/pyodide.json /tmp/cpython.zip
           python compare.py /tmp/cpython.json /tmp/pyodide.json
+
+  browser-e2e:
+    # The app in a real Chromium: offline demo to its stopping rule, run.zip
+    # download, reviewer-mode verification, and one live iteration.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install build playwright
+      - run: python -m playwright install --with-deps chromium
+      - run: python docs/build_app.py --out _site
+      - run: python validation/browser/e2e.py _site e2e-out --live
+      - name: Archives produced in the browser verify on the command line
+        run: |
+          pip install _site/app/*.whl
+          python validation/browser/check_archives.py e2e-out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-e2e
+          path: e2e-out/

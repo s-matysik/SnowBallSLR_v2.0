@@ -23,8 +23,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade "markdown>=3.6"
+      - run: python -m pip install --upgrade "markdown>=3.6" build
       - run: python docs/build.py --out _site
+      - run: python docs/build_app.py --out _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

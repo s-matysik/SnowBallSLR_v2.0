@@ -34,6 +34,16 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
   hashes, per-iteration records, candidate order, recall estimate and stop rule, and each runtime
   verifies the other's archive.
 
+- Browser app (`docs/app/index.html`, published at https://s-matysik.github.io/SnowBallSLR_v2.0/app/):
+  the library itself, in Pyodide in a Web Worker, with three modes: a new review (seeds, screening
+  with keyboard shortcuts, stopping-rule table, PRISMA diagram, report and run.zip downloads),
+  continuing a review from a run.zip made here or on the command line, and verifying a received
+  run.zip with no network access, for reviewers and editors. Reviews autosave in the browser
+  (IndexedDB). An offline demo runs on a frozen citation graph. `docs/build_app.py` builds the
+  wheel from the same commit into the site.
+- End-to-end browser test (`validation/browser/`, CI job `browser-e2e`) in Chromium, followed by
+  command-line verification of the archives the browser produced.
+
 ### Changed
 - The test-suite network guard blocks httpx's socket transport rather than `Client.get`, so
   in-memory transports can be tested; real requests from tests still fail (INV-4).
