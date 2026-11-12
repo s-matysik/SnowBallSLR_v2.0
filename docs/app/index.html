@@ -55,6 +55,7 @@ th{color:var(--ink-2);font-weight:600}
 .drop.over{border-color:var(--brand);background:var(--brand-soft)}
 .log{font-family:var(--mono);font-size:.78rem;color:var(--ink-3);max-height:7rem;overflow:auto;margin-top:.5rem}
 .log .err{color:var(--err)}
+body[data-busy] main{opacity:.85}
 .hidden{display:none!important}
 .sticky{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:.7rem 0 .2rem;margin-top:.6rem}
 kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 .3rem}
@@ -152,6 +153,7 @@ kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border
       <button id="reportBtn">Report and PRISMA diagram</button></div>
     <div id="reportOut"></div>
   </section>
+  <div id="working" class="hidden" role="status" style="position:fixed;bottom:1rem;right:1rem;background:var(--brand);color:#fff;padding:.5rem .9rem;border-radius:9px;font-weight:600"></div>
   <input type="file" id="filePick" accept=".zip,application/zip" class="hidden">
 </main>
 
@@ -223,10 +225,13 @@ function call(cmd, args, bytes){
 }
 let busy = false;
 async function guarded(label, fn){
-  if (busy) return; busy = true; document.body.style.cursor = "progress"; log(label);
+  if (busy) return; busy = true; document.body.dataset.busy = "1"; document.body.style.cursor = "progress"; log(label);
+  for (const b of document.querySelectorAll("button")) if (!b.disabled) { b.disabled = true; b.dataset.relock = "1"; }
+  $("working").textContent = label + "..."; $("working").classList.remove("hidden");
   try { return await fn(); }
   catch (e) { log("error: " + e.message, "err"); alert(friendly(e.message)); console.error(e.detail || e); }
-  finally { busy = false; document.body.style.cursor = ""; }
+  finally { busy = false; delete document.body.dataset.busy; document.body.style.cursor = ""; $("working").classList.add("hidden");
+    for (const b of document.querySelectorAll("button[data-relock]")) { b.disabled = false; delete b.dataset.relock; } }
 }
 function friendly(msg){
   if (/cursor= needs a free API key|HTTP 401/.test(msg)) return "OpenAlex needs an API key to page through a highly cited study. A free key takes a minute at openalex.org/settings/api; paste it into the OpenAlex API key field and press Next iteration again. Responses already received are kept.\n\n" + msg;

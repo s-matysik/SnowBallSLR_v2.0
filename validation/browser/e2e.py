@@ -59,6 +59,11 @@ def wait_ready(page):
     return round(time.time() - t0, 1)
 
 
+def idle(page, timeout=300_000):
+    """Wait until the app has finished the action it is performing."""
+    page.wait_for_function("() => !document.body.dataset.busy", timeout=timeout)
+
+
 def screen_loop(page, include, max_rounds=12):
     """Click through iterations until the review stops; returns per-iteration counts."""
     rounds = []
@@ -72,9 +77,10 @@ def screen_loop(page, include, max_rounds=12):
             if len(rounds) == 1:
                 page.screenshot(path=str(out / "screen.png"), full_page=False)
             page.click("#submitBtn")
-            page.wait_for_selector("#state:not(.hidden)", timeout=240_000)
+            idle(page)
         if page.is_visible("#nextBtn"):
             page.click("#nextBtn")
+            idle(page)
             continue
         break
     return rounds
@@ -102,12 +108,14 @@ with sync_playwright() as p:
     page.wait_for_function("document.querySelector('#seeds').value.includes('gold')")
     page.fill("#maxit", "10")
     page.click("#startBtn")
+    idle(page)
     note("demo_rounds", screen_loop(page, "r => !!r.querySelector('a[href*=\"gold\"]')"))
     note("demo_final", page.inner_text("#stateBadge"))
     note("demo_stats", page.inner_text("#stats").replace("\n", " "))
     page.screenshot(path=str(out / "state.png"), full_page=True)
     page.click("#reportBtn")
-    page.wait_for_selector("#prisma svg", timeout=120_000)
+    idle(page)
+    page.wait_for_selector("#prisma svg", timeout=30_000)
     note("demo_estimate_line", page.locator("#reportOut p.hint").inner_text())
     with page.expect_download() as d:
         page.click("#zipBtn")
@@ -119,7 +127,8 @@ with sync_playwright() as p:
     with page.expect_file_chooser() as fc:
         page.click("#verifyPick")
     fc.value.set_files(str(out / "demo_run.zip"))
-    page.wait_for_selector("#verifyOut .badge", timeout=120_000)
+    idle(page)
+    page.wait_for_selector("#verifyOut .badge", timeout=30_000)
     note("verify_badge", page.inner_text("#verifyOut .badge"))
     note("verify_text", page.inner_text("#verifyOut p")[:200])
     page.screenshot(path=str(out / "verify.png"), full_page=True)
@@ -137,7 +146,7 @@ with sync_playwright() as p:
         page2.fill("#maxit", "1")
         t0 = time.time()
         page2.click("#startBtn")
-        page2.wait_for_selector("#screen:not(.hidden), #state:not(.hidden)", timeout=300_000)
+        idle(page2)
         note("live_seconds_to_candidates", round(time.time() - t0, 1))
         if page2.is_visible("#screen"):
             note("live_candidates", page2.locator("#cands .cand").count())
@@ -145,7 +154,7 @@ with sync_playwright() as p:
             page2.screenshot(path=str(out / "live_screen.png"))
             page2.evaluate("() => document.querySelectorAll('#cands .cand').forEach((r, i) => r.querySelector(i < 5 ? '.inc' : '.exc').click())")
             page2.click("#submitBtn")
-            page2.wait_for_selector("#state:not(.hidden)", timeout=240_000)
+            idle(page2)
             note("live_final", page2.inner_text("#stateBadge"))
             note("live_rules", page2.inner_text("#rules")[:400])
             with page2.expect_download() as d2:
