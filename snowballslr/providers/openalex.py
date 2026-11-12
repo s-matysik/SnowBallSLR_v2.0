@@ -6,6 +6,7 @@ pagination. Abstracts arrive as an inverted index and are reconstructed here.
 
 from __future__ import annotations
 
+import os
 from collections.abc import Mapping
 from typing import Any
 
@@ -115,8 +116,15 @@ class OpenAlexProvider(BaseProvider):
     def headers(self) -> dict[str, str]:
         h = super().headers()
         if self.mailto:
-            h["User-Agent"] = f"SnowBallSLR/1.0 (mailto:{self.mailto})"
+            h["User-Agent"] = f"SnowBallSLR/2 (mailto:{self.mailto})"
         return h
+
+    def secret_params(self) -> dict[str, str]:
+        # Read at request time rather than stored on the instance or in Config:
+        # the run directory's config.yaml holds the full configuration, so a key
+        # kept there would be exported with the run.
+        key = os.environ.get("OPENALEX_API_KEY", "").strip()
+        return {"api_key": key} if key else {}
 
     def version_from_response(self, resp) -> dict[str, Any]:
         return {"date": resp.headers.get("date", "")}

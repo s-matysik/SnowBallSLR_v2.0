@@ -121,7 +121,7 @@ class CrossrefProvider(BaseProvider):
     def headers(self) -> dict[str, str]:
         h = super().headers()
         if self.mailto:
-            h["User-Agent"] = f"SnowBallSLR/1.0 (mailto:{self.mailto})"
+            h["User-Agent"] = f"SnowBallSLR/2 (mailto:{self.mailto})"
         return h
 
     def _params(self) -> dict[str, Any]:

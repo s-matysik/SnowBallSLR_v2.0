@@ -18,6 +18,14 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
   the run manifest (v1 kept a second copy in `core/run.py`).
 - Publishing to PyPI through Trusted Publishing (`.github/workflows/publish.yml`, `RELEASING.md`).
 
+- OpenAlex API key support through the `OPENALEX_API_KEY` environment variable. The key is sent
+  as a query parameter on the wire only (`BaseProvider.secret_params`): it is excluded from cache
+  keys, cache entries, `config.yaml`, the configuration hash and every error message, so a run
+  directory can be shared without it. Measured on 12 November 2026: without a key OpenAlex now
+  answers the first page of a query but returns HTTP 401 for any cursor page ("Paging past the first
+  page with cursor= needs a free API key"), so in v1 the forward chase of any seed cited more than
+  200 times fails.
+
 ### Changed
 - The test-suite network guard blocks httpx's socket transport rather than `Client.get`, so
   in-memory transports can be tested; real requests from tests still fail (INV-4).

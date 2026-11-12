@@ -105,17 +105,17 @@ class BaseProvider:
         return self._client
 
     def headers(self) -> dict[str, str]:
-        return {"User-Agent": "SnowBallSLR/1.0 (+https://github.com/s-matysik)"}
+        return {"User-Agent": "SnowBallSLR/2 (+https://github.com/s-matysik/SnowBallSLR_v2.0)"}
 
     def _http_get(self, url: str, params: dict[str, Any]) -> FetchResult:
         last_status = 0
         for attempt in range(self.retry.max_retries):
             self.limiter.wait()
             try:
-                resp = self.client.get(url, params=params)
+                resp = self.client.get(url, params={**params, **self.secret_params()})
             except httpx.HTTPError as exc:  # pragma: no cover - network path
                 if attempt == self.retry.max_retries - 1:
-                    raise ProviderError(f"{self.name}: transport failure: {exc}") from exc
+                    raise ProviderError(self._redact(f"{self.name}: transport failure: {exc}")) from exc
                 time.sleep(self.retry.delay(attempt))
                 continue
             last_status = resp.status_code
@@ -130,10 +130,10 @@ class BaseProvider:
                 time.sleep(self.retry.delay(attempt))
                 continue
             if resp.status_code >= 400:
-                raise ProviderError(
+                raise ProviderError(self._redact(
                     f"{self.name}: HTTP {resp.status_code} for {url} "
                     f"params={params} :: {_error_detail(resp)}"
-                )
+                ))
             # A 2xx status does not guarantee a JSON body. Interception proxies,
             # CDN maintenance pages and WAF challenges all return HTML with
             # status 200, and an unguarded resp.json() surfaces that as a bare
@@ -145,19 +145,34 @@ class BaseProvider:
             except ValueError as exc:
                 ctype = resp.headers.get("content-type", "unknown")
                 snippet = resp.text[:200].replace("\n", " ").strip()
-                raise ProviderError(
+                raise ProviderError(self._redact(
                     f"{self.name}: HTTP {resp.status_code} for {url} returned a "
                     f"non-JSON body (content-type={ctype!r}). This usually means an "
                     f"intercepting proxy, a maintenance page or a rate-limit "
                     f"challenge rather than a bad request. First 200 bytes: "
                     f"{snippet!r}"
-                ) from exc
+                )) from exc
             return FetchResult(
                 body=body,
                 status=resp.status_code,
                 version=self.version_from_response(resp),
             )
         raise ProviderError(f"{self.name}: exhausted retries (last status {last_status})")
+
+    def secret_params(self) -> dict[str, str]:
+        """Query parameters sent on the wire but never cached, hashed or logged.
+
+        Credentials belong here. Ordinary parameters are part of the cache key and
+        are stored in every cache entry, so a key passed that way would travel with
+        any run directory a researcher shares.
+        """
+        return {}
+
+    def _redact(self, text: str) -> str:
+        for v in self.secret_params().values():
+            if v:
+                text = text.replace(v, "<redacted>")
+        return text
 
     def version_from_response(self, resp: httpx.Response) -> dict[str, Any]:
         return {}
