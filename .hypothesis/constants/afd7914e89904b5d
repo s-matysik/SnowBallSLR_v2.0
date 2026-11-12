@@ -1,4 +1,0 @@
-# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/core/state.py
-# hypothesis_version: 6.165.2
-
-['Phase', 'RunState', 'aliases', 'awaiting_labels', 'decisions', 'expanded', 'frontier', 'history', 'iteration', 'last_decisions', 'pending', 'pending_scores', 'phase', 'ready', 'seeds', 'stopped', 'stopped_by', 'utf-8', 'works']

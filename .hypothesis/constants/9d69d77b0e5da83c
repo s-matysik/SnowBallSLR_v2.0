@@ -1,4 +1,0 @@
-# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/providers/grobid.py
-# hypothesis_version: 6.165.2
-
-[0.9, 60.0, 100.0, 180.0, './/tei:title', '/', '0', 'GrobidProvider', '_key', '_pdf', 'application/pdf', 'attempted', 'authors', 'consolidateCitations', 'doi', 'grobid', 'grobid_confidence', 'input', 'key', 'load_pdf_map', 'matched', 'parse_tei_references', 'path', 'rb', 'references', 'tei', 'tei:surname', 'title', 'unresolved', 'utf-8', 'venue', 'when', 'year']

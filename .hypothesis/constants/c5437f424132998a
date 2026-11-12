@@ -1,4 +1,0 @@
-# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/report/export.py
-# hypothesis_version: 6.165.2
-
-['\n}', '  author = {', ' and ', ',\n', '0', '1', '; ', '@', 'BOOK', 'CANDIDATE_FIELDS', 'CHAP', 'CPAPER', 'ER  - ', 'GEN', 'JOUR', '[^A-Za-z0-9]', 'anon', 'article', 'authors', 'book', 'book-chapter', 'decision', 'doi', 'found_via', 'inproceedings', 'journal-article', 'key', 'note', 'parent_keys', 'posted-content', 'proceedings', 'proceedings-article', 'providers', 'rank', 'read_labels', 'score', 'title', 'type', 'unresolved', 'utf-8', 'venue', 'w', 'write_bibtex', 'write_candidates_csv', 'write_ris', 'year', '{', '|', '}']

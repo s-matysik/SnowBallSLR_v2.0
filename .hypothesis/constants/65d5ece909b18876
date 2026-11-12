@@ -1,4 +1,0 @@
-# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/identity/keys.py
-# hypothesis_version: 6.165.2
-
-['(W\\d+)', '/', ':', '\\D', 'canonical_key', 'corpusid:', 'doi', 'doi:', 'normalize_source_id', 'openalex', 'openalex.org', 'parse_identifier', 'pmid', 'pmid:', 's2', 's2:', 'signature_key', 'surname', 'utf-8', '|']

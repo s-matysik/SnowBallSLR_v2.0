@@ -1,4 +1,0 @@
-# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/core/iteration.py
-# hypothesis_version: 6.165.2
-
-['IterationHistory', 'IterationStats', 'cumulative_included', 'cumulative_screened', 'estimable', 'frontier_size', 'n', 'n_after_dedup', 'n_eligible', 'n_excluded', 'n_expanded', 'n_hat', 'n_included', 'n_observed', 'n_raw', 'n_screened', 'recall', 'recall_lower', 'stats']

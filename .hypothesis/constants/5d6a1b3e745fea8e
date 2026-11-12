@@ -1,4 +1,0 @@
-# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/cli.py
-# hypothesis_version: 6.165.2
-
-[0.5, 130, 599, '#', ', ', '--config', '--file', '--format', '--graph', '--graph/--no-graph', '--limit', '--method', '--oracle', '--out', '--prisma/--no-prisma', '--refresh', '--seeds', '--version', '--what', 'Destination .tar.gz', 'FIRED', 'YAML configuration.', '_', '__main__', '_url', 'base_url', 'bib', 'by_reason', 'cache', 'candidates', 'chapman', 'config.yaml', 'csv', 'csv | ris | bib', 'included', 'iterations', 'n_rejected', 'note', 'observed_values', 'outputs', 'ris', 'run.json', 'share_rejected', 'state.json', 'triggered', 'utf-8', 'w:gz', 'warning']
