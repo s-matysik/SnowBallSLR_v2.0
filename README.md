@@ -2,6 +2,35 @@
 
 **Deterministic, saturation-aware snowballing for systematic literature reviews.**
 
+> **This is the development repository for SnowBallSLR 2.** Version 1 is described in
+> Matysik S. SnowBallSLR: saturation-aware and reproducible citation searching for systematic
+> reviews. *SoftwareX* 36 (2026) 103116, [doi:10.1016/j.softx.2026.103116](https://doi.org/10.1016/j.softx.2026.103116),
+> and its code is archived at [s-matysik/SnowBallSLR, tag v1.0.5](https://github.com/s-matysik/SnowBallSLR/releases/tag/v1.0.5).
+> This repository starts from that exact tree. Changes since v1.0.5 are listed in [CHANGELOG.md](CHANGELOG.md).
+
+### Code in the published v1 article
+
+Typesetting after proof approval altered the command-line and Python snippets in Section 2.3 of
+the published article: long options appear with an en dash (`–seeds`) instead of two hyphens, and
+the example DOI acquired thousands separators. The working forms are:
+
+```bash
+snowballslr init ./run --seeds seeds.txt --config config.yaml
+snowballslr step ./run                          # -> iterations/iter_001/candidates.csv
+snowballslr label ./run --file labels_001.csv   # evaluates every rule
+snowballslr estimate ./run
+snowballslr report ./run --graph
+snowballslr verify ./run
+```
+
+```python
+from snowballslr import Run, Config
+run = Run.init("./run", seeds=["10.1145/2601248.2601268"], config=Config.from_yaml("config.yaml"))
+```
+
+The sentence in Section 2.2 printed as "2 p.m. give a Chapman-corrected Lincoln-Petersen estimate"
+reads, as approved: "With two arms, a Chapman-corrected Lincoln-Petersen estimate ...".
+
 Automated bidirectional citation searching (backward and forward) that iterates to an explicitly defined saturation point, estimates how much of the relevant literature has been found, and replays byte-for-byte from its own cache.
 
 To our knowledge, and based on a survey of citation-searching tools indexed on PyPI, CRAN and GitHub as of August 2026, no existing tool combines all three of: configurable quantitative stopping rules evaluated and logged at every iteration; capture-recapture recall estimation with explicit assumption diagnostics; and a hash-verified reproducibility layer that replays from a content-addressed response cache and classifies database drift on refetch. It is *not* the first tool to perform bidirectional citation searching - citationchaser and paperfetcher (both 2022) precede it, and both are cited below.
