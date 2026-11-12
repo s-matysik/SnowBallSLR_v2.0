@@ -1,0 +1,24 @@
+{
+ "cpython": {
+  "runtime": "darwin",
+  "python": "3.12.13"
+ },
+ "pyodide": {
+  "runtime": "emscripten",
+  "python": "3.13.2"
+ },
+ "snowballslr": "2.0.0a1",
+ "artifacts_compared": 7,
+ "artifacts_differing": [],
+ "fields_identical": {
+  "config_hash": true,
+  "stopped_by": true,
+  "outputs": true,
+  "iterations": true,
+  "candidate_order": true,
+  "estimate": true
+ },
+ "pyodide_verifies_cpython_archive": true,
+ "cpython_verifies_pyodide_archive": true,
+ "identical": true
+}

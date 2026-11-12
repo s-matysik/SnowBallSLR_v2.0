@@ -31,3 +31,27 @@ jobs:
         run: pytest --cov=snowballslr --cov-report=term-missing --cov-fail-under=90
       - name: Determinism under hash randomization
         run: PYTHONHASHSEED=random pytest tests/test_determinism.py
+
+  browser-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build wheel and run the CPython side
+        run: |
+          python -m pip install build
+          python -m build -w .
+          pip install dist/*.whl
+          cd /tmp && FIXTURES=$GITHUB_WORKSPACE/tests/fixtures OUT=/tmp/cpython.json \
+            python $GITHUB_WORKSPACE/validation/parity/case.py
+      - name: Run the same case in Pyodide and compare
+        working-directory: validation/parity
+        run: |
+          npm install --no-save pyodide@0.28.3
+          node run_pyodide.mjs $GITHUB_WORKSPACE/dist/*.whl $GITHUB_WORKSPACE/tests/fixtures /tmp/pyodide.json /tmp/cpython.zip
+          python compare.py /tmp/cpython.json /tmp/pyodide.json

@@ -26,6 +26,14 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
   page with cursor= needs a free API key"), so in v1 the forward chase of any seed cited more than
   200 times fails.
 
+- `snowballslr.web.Session`: JSON-in/JSON-out session API used by the browser app, so the app holds
+  no review logic of its own; `pack` makes a deterministic run archive and `verify_archive` replays
+  a received archive from its own cache without network access.
+- Browser-CLI parity check (`validation/parity/`, CI job `browser-parity`): a complete review run
+  through CPython 3.12 and through Pyodide 0.28.3 (Python 3.13, WebAssembly) yields identical artifact
+  hashes, per-iteration records, candidate order, recall estimate and stop rule, and each runtime
+  verifies the other's archive.
+
 ### Changed
 - The test-suite network guard blocks httpx's socket transport rather than `Client.get`, so
   in-memory transports can be tested; real requests from tests still fail (INV-4).
