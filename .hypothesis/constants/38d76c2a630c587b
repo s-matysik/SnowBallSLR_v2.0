@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/estimate/membership.py
+# hypothesis_version: 6.165.2
+
+['.', '10.', 'DOI', 'MembershipSet', 'coverage', 'doi:', 'http://doi.org/', 'http://dx.doi.org/', 'https://doi.org/', 'https://dx.doi.org/', 'load_membership_sets', 'n_dois', 'n_rows', 'n_without_doi', 'name', 'normalize_doi', 'replace', 'source', 'utf-8-sig']

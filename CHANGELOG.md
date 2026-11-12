@@ -8,3 +8,17 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
 - Repository imported from s-matysik/SnowBallSLR at tag v1.0.5 (commit 065bac5).
 - README section restoring the command-line and Python snippets altered by typesetting in the
   published v1 article.
+- `snowballslr.identity.jaro`: pure-Python Jaro-Winkler, bit-equal to rapidfuzz's reference
+  implementation on 240,000 comparisons of real titles (`validation/jaro_equality.json`).
+
+### Changed
+- Deduplication and GROBID reference matching use the pure-Python Jaro-Winkler unconditionally.
+  The compiled rapidfuzz wheel fuses the Winkler step into a fused multiply-add on arm64, so its
+  scores differ from the reference in the last bit on 358 of those 240,000 comparisons and can differ
+  between machines. Scores are written to `audit.jsonl`, so this mattered for byte-identical audit
+  logs across platforms; it did not affect `run.json`, which does not hash the audit log, and a
+  merge decision changes only when a score lies within one unit in the last place of the threshold.
+  The pure implementation is also what makes the library importable in Pyodide.
+
+### Removed
+- `rapidfuzz` as a runtime dependency (kept in the `dev` extra as a test reference).

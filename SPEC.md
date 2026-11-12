@@ -643,7 +643,7 @@ Targets: line coverage ≥ 90%, branch coverage ≥ 80%. CI on Linux + macOS (ar
 
 ## 15. Dependencies
 
-**Core:** `httpx`, `pydantic>=2`, `rapidfuzz`, `numpy`, `scipy`, `networkx`, `statsmodels`, `typer`, `pyyaml`, `orjson`.
+**Core:** `httpx`, `pydantic>=2`, `numpy`, `scipy`, `networkx`, `statsmodels`, `typer`, `pyyaml`, `orjson`. Jaro-Winkler is implemented in pure Python (`identity/jaro.py`) rather than taken from rapidfuzz, so that it is available in Pyodide and evaluates identically on every platform; see the module docstring.
 **Extras:** `[embeddings]` → `sentence-transformers`; `[pdf]` → `lxml` (TEI parsing); `[viz]` → `matplotlib`.
 **Dev:** `pytest`, `pytest-cov`, `hypothesis`, `ruff`, `mypy --strict`, `respx`.
 

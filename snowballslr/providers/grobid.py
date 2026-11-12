@@ -19,8 +19,7 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree as ET
 
-from rapidfuzz.distance import JaroWinkler
-
+from ..identity.jaro import jaro_winkler_similarity
 from ..identity.keys import canonical_key
 from ..identity.normalize import normalize_title, normalize_year
 from ..types import Author, Direction, Work
@@ -153,7 +152,7 @@ class GrobidProvider(BaseProvider):
         for work, score in candidates:
             if score < self.min_match_score or not work.doi:
                 continue
-            sim = JaroWinkler.similarity(target, work.title_norm)
+            sim = jaro_winkler_similarity(target, work.title_norm)
             if sim < self.min_title_similarity:
                 continue
             ry, wy = ref.get("year"), work.year

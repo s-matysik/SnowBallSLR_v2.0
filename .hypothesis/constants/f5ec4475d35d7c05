@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/determinism/cache.py
+# hypothesis_version: 6.165.2
+
+[200, '*.json', '+00:00', 'Cache', 'CacheEntry', 'Z', 'body', 'cache_key', 'http_status', 'method', 'params', 'provider', 'provider_version', 'response_hash', 'retrieved_at', 'sha256:', 'sha256_of', 'utf-8']

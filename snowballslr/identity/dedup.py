@@ -10,9 +10,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
-from rapidfuzz.distance import JaroWinkler
-
 from ..types import Work, field_conflicts
+from .jaro import jaro_winkler_similarity
 
 __all__ = ["DedupResult", "MergeEvent", "blocking_key", "deduplicate"]
 
@@ -133,7 +132,7 @@ def _match_tier(a: Work, b: Work, jw_threshold: float) -> tuple[str, float | Non
         return "T2", 1.0
     # T3: fuzzy title, year within tolerance, same first author.
     if _year_close(a, b) and _same_first_author(a, b):
-        score = JaroWinkler.similarity(a.title_norm, b.title_norm)
+        score = jaro_winkler_similarity(a.title_norm, b.title_norm)
         if score >= jw_threshold:
             return "T3", score
     # T4: identical title and year, author missing on at least one side.

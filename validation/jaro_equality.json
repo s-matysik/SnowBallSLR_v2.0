@@ -1,0 +1,18 @@
+{
+ "titles": 70212,
+ "pairs": 120000,
+ "comparisons": 240000,
+ "equal_to_rapidfuzz_reference_python": 240000,
+ "equal_to_rapidfuzz_compiled": 239642,
+ "rapidfuzz_version": "3.14.5",
+ "machine": "arm64",
+ "system": "Darwin",
+ "python": "3.12.13",
+ "example_compiled_difference": {
+  "a": "the psychological and ethological antecedents of human consent to techno empowerment of autonomous office assistants",
+  "b": "the impact of social media marketing on consumers food products in chennai from buying behavior to purchase decisions",
+  "pure": "0.8311471435498132",
+  "compiled": "0.8311471435498131"
+ },
+ "note": "Differences from the compiled wheel are last-bit only and arise because the compiler fuses the Winkler step into one fused multiply-add on this architecture; the reference implementation agrees exactly."
+}

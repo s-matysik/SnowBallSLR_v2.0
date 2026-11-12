@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/estimate/assumptions.py
+# hypothesis_version: 6.165.2
+
+[0.05, 0.25, 0.5, 0.83, 1.2, 2.0, 'AssumptionReport', 'arms', 'chi2', 'closure', 'conditioned_on', 'dependence', 'diagnose', 'en', 'first_request', 'heterogeneity', 'language', 'last_request', 'n00', 'n01', 'n10', 'n11', 'n_arms', 'non-en', 'odds_ratio', 'older', 'only dof=1 supported', 'p_value', 'pairs', 'publication_year', 'recent', 'table', 'testable', 'unknown', 'unresolved_records', 'venue_type', 'warnings']

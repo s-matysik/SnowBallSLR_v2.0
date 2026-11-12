@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/types.py
+# hypothesis_version: 6.165.2
+
+['Author', 'Decision', 'Direction', 'Provenance', 'Work', 'abstract', 'authors', 'backward', 'cited_by_count', 'direction', 'doi', 'exclude', 'forward', 'given', 'include', 'is_retracted', 'iteration', 'key', 'language', 'orcid', 'parent_key', 'provenance', 'provider', 'reference_count', 'response_hash', 'retrieved_at', 'seed', 'source_ids', 'surname', 'title', 'title_norm', 'type', 'unresolved', 'unscreened', 'utcnow', 'venue', 'year']

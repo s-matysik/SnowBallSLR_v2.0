@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/providers/crossref.py
+# hypothesis_version: 6.165.2
+
+['/', 'CrossrefProvider', 'DOI', 'ORCID', 'User-Agent', '_doi', 'abstract', 'article-title', 'author', 'container-title', 'created', 'crossref', 'date-parts', 'family', 'given', 'issued', 'items', 'journal-title', 'language', 'mailto', 'match', 'message', 'parse_item', 'parse_reference', 'published-online', 'published-print', 'query.bibliographic', 'reference', 'reference-count', 'resolve', 'rows', 'score', 'select', 'title', 'type', 'unstructured', 'volume-title', 'year']

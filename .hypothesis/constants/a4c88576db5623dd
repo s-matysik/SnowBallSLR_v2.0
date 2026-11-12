@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/simulation/metrics.py
+# hypothesis_version: 6.165.2
+
+[0.5, 0.95, 1.0, 'RecallCurve', 'StoppingOutcome', 'bias', 'calibration', 'cumulative_included', 'cumulative_screened', 'detail', 'excess_screened', 'fired_at_iteration', 'iterations', 'mae', 'missed_studies', 'n', 'never_fired', 'optimal_iteration', 'overestimate_rate', 'overshoot_iterations', 'recall', 'recall_at_stop', 'recall_curve', 'regret', 'rmse', 'rule', 'screening_burden', 'triggered']

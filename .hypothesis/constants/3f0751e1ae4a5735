@@ -1,0 +1,4 @@
+# file: /Users/sebastianmatysik/.claude-science/orgs/acfa7c51-4bf1-49a5-9495-3958c15db03d/workspaces/fffe5ccb-bb92-4361-a0d2-3ad310d499b7/v2/snowballslr/core/run.py
+# hypothesis_version: 6.165.2
+
+['(none)', '+00:00', '1.0.5', '1970-01-01T00:00:00Z', 'Run', 'Z', '_membership_cache', 'audit.jsonl', 'by_reason', 'candidates.csv', 'candidates.ris', 'components', 'config.yaml', 'dedup_merge', 'expand', 'expand_failed', 'included.csv', 'ineligible', 'iterations', 'labels_template.csv', 'language', 'language_not_allowed', 'max_iterations', 'n_fresh', 'n_rejected', 'network.graphml', 'no_abstract', 'no_language', 'no_title', 'no_type', 'no_year', 'observed_values', 'outputs', 'prisma.json', 'prisma.svg', 'report.md', 'retracted', 'run.json', 'seed', 'seed_resolve_failed', 'seed_resolved', 'seed_unresolved', 'sha256:seed', 'sha256:unknown', 'share_rejected', 'state.json', 'stop_eval', 'stopped', 'type', 'type_not_allowed', 'unknown', 'year_above_max', 'year_below_min']
