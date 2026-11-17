@@ -358,6 +358,11 @@ class Run:
             for k in sorted(decisions)
             if str(decisions[k]).strip().lower() == Decision.INCLUDE
         ]
+        qt = self.queue_test(decisions)
+        if qt is not None and qt["n_remaining"] > 0:
+            self.state.queue_tests.append({"iteration": self.state.iteration, **qt})
+            self.audit.emit(self.state.iteration, "queue_test", **{
+                k: v for k, v in qt.items() if k != "left_unscreened"})
         self.state.enqueue(newly_included)
         self.state.pending = []
         self.state.pending_scores = {}
@@ -377,6 +382,45 @@ class Run:
             n_screened=n_screened,
             n_included=n_included,
         )
+
+    def queue_test(self, decisions: Mapping[str, str | Decision]) -> dict[str, Any] | None:
+        """Within-iteration stopping test on the current queue (version 2).
+
+        Returns None unless ``stopping.within_iteration`` is configured. The records
+        screened so far must be a prefix of the ranked queue, because the test treats
+        the queue order as the order of screening; otherwise the result reports
+        ``stop: False`` with the reason.
+        """
+        settings = self.config.stopping.within_iteration
+        if settings is None or not self.state.pending:
+            return None
+        from ..stopping.queue import queue_test
+
+        norm = {self.state.resolve_alias(k): str(v).strip().lower() for k, v in decisions.items()}
+        screened = {Decision.INCLUDE.value, Decision.EXCLUDE.value}
+        order = [self.state.resolve_alias(k) for k in self.state.pending]
+        prefix: list[bool] = []
+        for key in order:
+            if norm.get(key) not in screened:
+                break
+            prefix.append(norm[key] == Decision.INCLUDE.value)
+        n_decided = sum(1 for key in order if norm.get(key) in screened)
+        prior_rel = prior_unseen = 0
+        if settings.scope == "review":
+            seeds = set(self.state.seeds)
+            prior_rel = sum(1 for k in self.state.included_keys if k not in seeds)
+            here = set(order)
+            prior_unseen = len({k for q in self.state.queue_tests for k in q.get("left_unscreened", ())
+                                if k not in self.state.decisions and k not in here})
+        res = queue_test(prefix, len(order), target=settings.target, alpha=settings.alpha,
+                         prior_relevant=prior_rel, prior_unseen=prior_unseen).to_dict()
+        res.update(scope=settings.scope, prior_relevant=prior_rel, prior_unseen=prior_unseen)
+        if n_decided != len(prefix):
+            res.update(stop=False, rationale=(
+                f"{n_decided - len(prefix)} record(s) were screened out of rank order; the "
+                "test needs the queue screened from the top, so it was not applied."))
+        res["left_unscreened"] = [k for k in order if norm.get(k) not in screened]
+        return res
 
     def label_from_file(self, path: str | Path, *, allow_empty: bool = False) -> None:
         labels = read_labels(path)

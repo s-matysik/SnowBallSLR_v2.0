@@ -31,6 +31,7 @@ class PrismaCounts:
     excluded: int = 0
     included: int = 0
     unresolved: int = 0
+    not_screened: int = 0
     per_iteration: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -46,6 +47,10 @@ class PrismaCounts:
             "studies_included": self.included,
             "records_unresolvable": self.unresolved,
             "per_iteration": self.per_iteration,
+            # Version 2: candidates left unscreened by the within-iteration rule and
+            # never decided later. Omitted when zero so version-1 outputs are unchanged.
+            **({"records_not_screened_within_iteration_stop": self.not_screened}
+               if self.not_screened else {}),
         }
 
 
@@ -89,6 +94,8 @@ def build_counts(state: RunState, audit_events: Sequence[Mapping[str, Any]] = ()
     )
     counts.included = len([k for k in state.included_keys if k not in seed_keys])
     counts.per_iteration = [s.to_dict() for s in state.history]
+    left = {k for qt in state.queue_tests for k in qt.get("left_unscreened", ())}
+    counts.not_screened = sum(1 for k in left if k not in state.decisions and k not in seed_keys)
     return counts
 
 
@@ -141,6 +148,8 @@ def write_prisma_svg(path: str | Path, counts: PrismaCounts) -> Path:
             f"ineligible n = {counts.ineligible_removed}\n"
             f"unresolvable n = {counts.unresolved}",
         ),
+        *([("Records not screened", f"within-iteration stopping rule n = {counts.not_screened}")]
+          if counts.not_screened else []),
         ("Records screened", f"n = {counts.screened}"),
         ("Records excluded", f"n = {counts.excluded}"),
         ("Studies included in review", f"n = {counts.included}"),

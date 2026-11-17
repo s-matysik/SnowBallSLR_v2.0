@@ -172,6 +172,8 @@ def label(
     run = _load_run(run_dir, graph)
     try:
         run.label_from_file(file)
+        if run.state.queue_tests and run.state.queue_tests[-1]["iteration"] == run.state.iteration:
+            _echo(f"within-iteration test: {run.state.queue_tests[-1]['rationale']}")
     except (LabelError, StateError) as exc:
         _echo(f"label error: {exc}", err=True)
         raise typer.Exit(EXIT_VERIFY) from exc

@@ -145,8 +145,24 @@ class StoppingRuleSettings(BaseModel):
     model_config = {"extra": "allow"}
 
 
+class WithinIterationSettings(BaseModel):
+    """Ranked-queue stopping inside one iteration (Callaghan and Mueller-Hansen 2020).
+
+    ``target`` is the recall required within each iteration's candidate queue and
+    ``alpha`` the significance level of the test that it has been reached.
+    """
+
+    target: float = Field(0.95, gt=0, lt=1)
+    alpha: float = Field(0.05, gt=0, lt=1)
+    # "queue": recall within the current iteration's queue. "review": recall over every
+    # record identified so far, pooling earlier iterations (see stopping/queue.py).
+    scope: Literal["queue", "review"] = "queue"
+
+
 class StoppingSettings(BaseModel):
     mode: Literal["any_of", "all_of"] = "any_of"
+    # None (the default) leaves the configuration hash identical to version 1.
+    within_iteration: WithinIterationSettings | None = None
     rules: list[StoppingRuleSettings] = Field(
         default_factory=lambda: [
             StoppingRuleSettings(type="marginal_yield", eps=0.01, k=2),
@@ -230,7 +246,12 @@ class Config(BaseModel):
 
     def hashable(self) -> dict[str, Any]:
         """Config with secrets and contact details stripped."""
-        return _strip_secrets(self.model_dump(mode="json"))
+        d = _strip_secrets(self.model_dump(mode="json"))
+        # Fields added in version 2 are omitted while unset, so that a version-1
+        # configuration keeps the hash recorded in its run manifests.
+        if d.get("stopping", {}).get("within_iteration") is None:
+            d.get("stopping", {}).pop("within_iteration", None)
+        return d
 
     @property
     def config_hash(self) -> str:

@@ -194,6 +194,13 @@ class Session:
         self._run().label(dict(decisions), allow_empty=allow_empty)
         return self.status()
 
+    def queue_test(self, decisions: Mapping[str, str]) -> dict[str, Any] | None:
+        """Within-iteration stopping test on the decisions made so far (no state change)."""
+        res = self._run().queue_test(dict(decisions))
+        if res is not None:
+            res = {k: v for k, v in res.items() if k != "left_unscreened"}
+        return res
+
     def estimate(self) -> dict[str, Any]:
         est = self._run().estimate_recall()
         return est.to_dict() if hasattr(est, "to_dict") else dict(est)
@@ -215,6 +222,10 @@ class Session:
             "iteration": st.iteration,
             "phase": str(getattr(st.phase, "value", st.phase)),
             "stopped": run.stopped,
+            "within_iteration": (run.config.stopping.within_iteration.model_dump()
+                                 if run.config.stopping.within_iteration else None),
+            "queue_tests": [{k: v for k, v in q.items() if k != "left_unscreened"}
+                            for q in st.queue_tests],
             "stopped_by": st.stopped_by,
             "seeds": len(st.seeds),
             "included": len(st.included),

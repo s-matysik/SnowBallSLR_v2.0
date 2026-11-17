@@ -46,6 +46,9 @@ class RunState:
     history: IterationHistory = field(default_factory=IterationHistory)
     stopped_by: str | None = None
     last_decisions: list[dict[str, Any]] = field(default_factory=list)
+    # Within-iteration queue tests, one per iteration that left candidates
+    # unscreened; absent from state.json in runs that never use the rule.
+    queue_tests: list[dict[str, Any]] = field(default_factory=list)
 
     # -- registry --------------------------------------------------------
 
@@ -160,6 +163,7 @@ class RunState:
             "history": self.history.to_dict(),
             "stopped_by": self.stopped_by,
             "last_decisions": self.last_decisions,
+            **({"queue_tests": self.queue_tests} if self.queue_tests else {}),
         }
 
     def save(self, path: str | Path) -> None:
@@ -188,6 +192,7 @@ class RunState:
             history=IterationHistory.from_dict(d.get("history") or {}),
             stopped_by=d.get("stopped_by"),
             last_decisions=list(d.get("last_decisions") or []),
+            queue_tests=list(d.get("queue_tests") or []),
         )
 
     # -- convenience -----------------------------------------------------
