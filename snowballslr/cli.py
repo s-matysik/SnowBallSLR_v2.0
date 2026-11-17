@@ -228,9 +228,22 @@ def status(run_dir: Path = typer.Argument(...)) -> None:
 def estimate(
     run_dir: Path = typer.Argument(...),
     method: str = typer.Option("chapman", "--method", help="chapman | loglinear | chao"),
+    database: Path | None = typer.Option(
+        None, "--database",
+        help="Studies included from the database search (CSV with a DOI column, RIS, or one "
+             "DOI per line): estimate recall with the database search and citation searching "
+             "as the two arms."),
+    doi_column: str = typer.Option("DOI", "--doi-column"),
 ) -> None:
     """Estimate recall by capture-recapture."""
     r = _load_run(run_dir)
+    if database is not None:
+        res = r.estimate_cross_method(database, doi_column=doi_column)
+        _echo(json.dumps(res, indent=2, sort_keys=True))
+        for w in res["warnings"]:
+            _echo(f"warning: {w}", err=True)
+        r.close()
+        return
     est = r.estimate_recall(method=method)
     _echo(json.dumps(est.to_dict(), indent=2, sort_keys=True))
     if est.warnings:

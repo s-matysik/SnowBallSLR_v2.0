@@ -1,0 +1,13 @@
+subset,rho,q,regime,depth,n,chapman_estimable,chapman_coverage,chapman_median_rel_bias,chao1_coverage,chao1_median_rel_bias,median_observed_share
+at_exhaustion,0.0,all,all,exhaustion,810,810,0.9074,0.0026,0.2901,0.0876,0.9727
+at_exhaustion,0.3,all,all,exhaustion,810,809,0.9555,0.0034,0.2296,0.0541,0.9818
+at_exhaustion,0.6,all,all,exhaustion,810,810,0.9531,0.0008,0.3679,0.0228,0.9818
+at_exhaustion,0.3,0.5,all,exhaustion,270,269,0.9331,0.0021,0.0,0.3556,0.95
+at_exhaustion,0.3,0.7,all,exhaustion,270,270,0.9889,0.005,0.3,0.0541,0.9818
+at_exhaustion,0.3,0.85,all,exhaustion,270,270,0.9444,0.0034,0.3889,0.0082,1.0
+at_exhaustion,0.3,all,dense,exhaustion,270,270,0.9926,0.0043,0.1111,0.0607,0.99
+at_exhaustion,0.3,all,sparse,exhaustion,270,270,0.9704,-0.0034,0.3556,0.0282,0.9809
+at_exhaustion,0.3,all,diffuse,exhaustion,270,269,0.9033,0.0038,0.2222,0.0587,0.9818
+by_depth,0.3,all,all,1,810,806,0.9082,-0.004,0.3185,0.1349,0.9304
+by_depth,0.3,all,all,2,810,809,0.9518,0.0034,0.2395,0.0552,0.9818
+by_depth,0.3,all,all,3,769,768,0.9531,0.0034,0.2367,0.0536,0.9818

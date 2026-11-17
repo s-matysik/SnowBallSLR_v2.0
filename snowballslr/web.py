@@ -201,6 +201,16 @@ class Session:
             res = {k: v for k, v in res.items() if k != "left_unscreened"}
         return res
 
+    def cross_method(self, text: str, doi_column: str = "DOI") -> dict[str, Any]:
+        """Cross-method recall from the text of a database-included file (CSV, RIS, DOIs)."""
+        from .estimate.crossmethod import cross_method_estimate, parse_doi_list
+
+        dois, missing = parse_doi_list(text, doi_column=doi_column)
+        if not dois:
+            raise ValueError("no DOI found in the file; expected a DOI column, RIS DO tags, "
+                             "or one DOI per line")
+        return cross_method_estimate(self._run().state, dois, database_without_doi=missing)
+
     def estimate(self) -> dict[str, Any]:
         est = self._run().estimate_recall()
         return est.to_dict() if hasattr(est, "to_dict") else dict(est)

@@ -673,6 +673,18 @@ class Run:
             membership=self._membership_sets(),
         )
 
+    def estimate_cross_method(self, database: str | Path, *, doi_column: str = "DOI") -> dict[str, Any]:
+        """Recall of the database search and citation searching combined (version 2).
+
+        ``database`` lists the studies included from the review's database search: a
+        CSV export with a DOI column, an RIS file, or one DOI per line.
+        """
+        from ..estimate.crossmethod import cross_method_estimate, parse_doi_list
+
+        text = Path(database).read_text(encoding="utf-8-sig", errors="replace")
+        dois, missing = parse_doi_list(text, doi_column=doi_column)
+        return cross_method_estimate(self.state, dois, database_without_doi=missing)
+
     def _membership_sets(self):
         """Membership arms, loaded once and cached for the run's lifetime.
 

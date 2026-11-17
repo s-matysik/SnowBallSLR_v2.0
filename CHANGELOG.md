@@ -2,7 +2,7 @@
 
 All notable changes since the version described in SoftwareX 36 (2026) 103116.
 
-## [Unreleased] - 2.0.0
+## [2.0.0] - 2026-11-17
 
 ### Added
 - Repository imported from s-matysik/SnowBallSLR at tag v1.0.5 (commit 065bac5).
@@ -44,6 +44,20 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
 - End-to-end browser test (`validation/browser/`, CI job `browser-e2e`) in Chromium, followed by
   command-line verification of the archives the browser produced.
 
+- Within-iteration stopping (`stopping.within_iteration`, `snowballslr.stopping.queue`): ranked
+  quasi-sampling test of Callaghan and Mueller-Hansen (2020) on the screened top of each iteration's
+  ranked queue, scope `review` (default; pools earlier iterations) or `queue`. `Run.queue_test`,
+  `Session.queue_test`, a live indicator in the browser app, the test recorded in `state.json`
+  (`queue_tests`, only when used) and a PRISMA box for records left unscreened. Paired benchmark on
+  270 simulated reviews: `validation/validation_queue_stopping.py`, `data/queue_stopping_benchmark.csv`
+  (alpha 0.05) and `data/queue_stopping_alpha001.csv` (alpha 0.01).
+- Cross-method recall (`snowballslr.estimate.crossmethod`, `snowballslr estimate --database`,
+  `Session.cross_method`): Chapman over the studies included from the database search and those
+  included through citation searching, seeds removed, DOI matching with unmatched records counted
+  against recall. Pre-registered go/no-go study (`validation/PREREGISTRATION_pillar_A.md`,
+  `validation/validation_crossmethod.py`, `data/crossmethod_coverage.csv`): GO.
+- `MIGRATION.md`, `validation/README_v2.md` (experiments and CSV data dictionary).
+
 ### Changed
 - The test-suite network guard blocks httpx's socket transport rather than `Client.get`, so
   in-memory transports can be tested; real requests from tests still fail (INV-4).
@@ -54,6 +68,9 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
   logs across platforms; it did not affect `run.json`, which does not hash the audit log, and a
   merge decision changes only when a score lies within one unit in the last place of the threshold.
   The pure implementation is also what makes the library importable in Pyodide.
+
+- `validation_generator.generate_graph` also returns each work's latent prominence (`latent`); the
+  random sequence is unchanged, so every published benchmark figure is reproduced as before.
 
 ### Removed
 - `rapidfuzz` as a runtime dependency (kept in the `dev` extra as a test reference).

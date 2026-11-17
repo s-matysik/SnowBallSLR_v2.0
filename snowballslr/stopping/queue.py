@@ -44,7 +44,7 @@ from typing import Any
 import numpy as np
 from scipy.stats import hypergeom
 
-__all__ = ["QueueTest", "queue_test", "CITATION"]
+__all__ = ["CITATION", "QueueTest", "queue_test"]
 
 CITATION = "Callaghan and Mueller-Hansen (2020), doi:10.1186/s13643-020-01521-4"
 

@@ -75,6 +75,9 @@ def screen_loop(page, include, max_rounds=12):
                 const hit = ({include})(r); r.querySelector(hit ? '.inc' : '.exc').click(); if (hit) k++; }}); return k; }}""")
             rounds.append({"iteration": int(page.inner_text("#itNo")), "candidates": n, "included": inc})
             if len(rounds) == 1:
+                page.wait_for_function("() => document.querySelector('#queueBox').textContent.length > 0",
+                                       timeout=30_000)
+                rounds[-1]["queue_test"] = page.inner_text("#queueBox")[:200]
                 page.screenshot(path=str(out / "screen.png"), full_page=False)
             page.click("#submitBtn")
             idle(page)
@@ -117,6 +120,16 @@ with sync_playwright() as p:
     idle(page)
     page.wait_for_selector("#prisma svg", timeout=30_000)
     note("demo_estimate_line", page.locator("#reportOut p.hint").inner_text())
+    # Cross-method recall: half of the relevant demo records as "database inclusions".
+    gold = (Path(a.site) / "app" / "demo" / "mini_gold.csv").read_text().split()[1:]
+    db_file = out / "database_included.csv"
+    db_file.write_text("DOI\n" + "\n".join(k.split(":", 1)[1] for k in sorted(gold)[::2]) + "\n")
+    with page.expect_file_chooser() as fc0:
+        page.click("#dbPick")
+    fc0.value.set_files(str(db_file))
+    idle(page)
+    page.wait_for_selector("#dbOut .badge", timeout=30_000)
+    note("cross_method_text", page.inner_text("#dbOut")[:300])
     with page.expect_download() as d:
         page.click("#zipBtn")
     d.value.save_as(out / "demo_run.zip")
@@ -165,3 +178,5 @@ with sync_playwright() as p:
 print("console errors:", len(res["console_errors"]), "| dialogs:", res["steps"])
 assert res.get("verify_badge") == "verified", res.get("verify_text")
 assert "stopped" in res.get("demo_final", ""), res.get("demo_final")
+assert "recall" in res.get("cross_method_text", ""), res.get("cross_method_text")
+assert res["demo_rounds"][0].get("queue_test"), res["demo_rounds"][0]

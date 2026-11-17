@@ -196,5 +196,8 @@ def generate_graph(spec: GraphSpec) -> dict[str, Any]:
         "gold": sorted(rel_keys),
         "disconnected": sorted(disconnected),
         "provider_edges": provider_edges,
+        # Latent prominence per work (drives citation counts and provider indexing);
+        # exported for experiments that need a correlated external arm.
+        "latent": {k: round(latent[k], 6) for k in keys},
         "spec": spec.to_dict(),
     }

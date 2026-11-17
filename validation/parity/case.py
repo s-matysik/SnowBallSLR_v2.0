@@ -15,6 +15,7 @@ from pathlib import Path
 
 from snowballslr import __version__
 from snowballslr.simulation.oracle import Oracle
+from snowballslr.stopping.queue import queue_test
 from snowballslr.web import Session, pack, verify_archive
 
 fx = Path(os.environ["FIXTURES"])
@@ -47,6 +48,10 @@ fp = {
     "candidate_order": steps,
     "self_verify_ok": verify_archive(archive)["ok"],
     "estimate": s.estimate(),
+    # Version 2 within-iteration test: scipy's hypergeometric CDF in both runtimes.
+    "queue_tests": [queue_test(lab, n, prior_relevant=pr).to_dict() for lab, n, pr in (
+        ([True] * 60 + [False] * 200, 400, 0), ([True] * 4 + [False] * 120, 200, 300),
+        ([True, False, False] * 30, 150, 25))],
 }
 if other:
     fp["verify_other"] = verify_archive(Path(other).read_bytes())

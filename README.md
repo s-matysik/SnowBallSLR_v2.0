@@ -2,11 +2,55 @@
 
 **Deterministic, saturation-aware snowballing for systematic literature reviews.**
 
-> **This is the development repository for SnowBallSLR 2.** Version 1 is described in
+> **This is the repository of SnowBallSLR 2.** Version 1 is described in
 > Matysik S. SnowBallSLR: saturation-aware and reproducible citation searching for systematic
 > reviews. *SoftwareX* 36 (2026) 103116, [doi:10.1016/j.softx.2026.103116](https://doi.org/10.1016/j.softx.2026.103116),
 > and its code is archived at [s-matysik/SnowBallSLR, tag v1.0.5](https://github.com/s-matysik/SnowBallSLR/releases/tag/v1.0.5).
 > This repository starts from that exact tree. Changes since v1.0.5 are listed in [CHANGELOG.md](CHANGELOG.md).
+
+## What is new in version 2
+
+**Run it in your browser.** Open <https://s-matysik.github.io/SnowBallSLR_v2.0/app/>: no installation,
+no account, nothing to configure. The page runs this exact library (Python compiled to WebAssembly,
+Pyodide 0.28.3) and your screening decisions never leave the machine. Start from seed DOIs, screen
+ranked candidates with the keyboard, download `run.zip`, and continue the same review later in the
+browser or on the command line. A **Verify** tab lets a peer reviewer or editor replay a received
+`run.zip` offline and check every output against the hash recorded when it was produced. CI checks
+that CPython and the browser produce identical artifact hashes for the same review
+(`validation/parity/`) and drives the app end to end in Chromium (`validation/browser/`).
+
+**Stop screening inside an iteration.** Each iteration's candidates are ranked; with
+
+```yaml
+stopping:
+  within_iteration: {target: 0.95, alpha: 0.05, scope: review}
+```
+
+the library tests, after the decisions you have made from the top of the queue, the null
+hypothesis that recall is below the target (ranked quasi-sampling, Callaghan and Mueller-Hansen
+2020), and you may leave the rest of the queue unscreened once it is rejected. Records left
+unscreened get their own PRISMA box. On 270 simulated reviews (paired, `data/queue_stopping_benchmark.csv`)
+this cut screening by a median 19% (10th-90th percentile 10-28%) at a mean recall cost of 0.4
+percentage points (worst review 2.5). The nominal alpha is not the realised error rate: 11% of
+cuts were made while recall was below target at alpha 0.05, 5% at alpha 0.01 (13% saving).
+`scope: queue` protects each iteration separately and saves 3%.
+
+**Estimate the recall of the whole search.** Give the studies you included from your database search:
+
+```bash
+snowballslr estimate ./run --database included_from_scopus.csv    # CSV with a DOI column, RIS, or DOIs
+```
+
+The database search and citation searching then act as two capture arms from different discovery
+processes, seeds set aside. In a pre-registered simulation (`validation/PREREGISTRATION_pillar_A.md`,
+810 reviews) the Chapman interval contained the true population in 95.6% of reviews with a median
+bias of +0.3%; version 1's provider arms reached 0%. The browser app offers the same as an upload
+in the report view.
+
+**Also:** OpenAlex API key through `OPENALEX_API_KEY` (wire-only, never written into a run; without a
+key OpenAlex no longer pages forward citations past the first 200), a pure-Python Jaro-Winkler that
+makes deduplication bit-identical across platforms, and unchanged configuration hashes for every
+version-1 configuration. See [MIGRATION.md](MIGRATION.md).
 
 ### Code in the published v1 article
 

@@ -148,15 +148,18 @@ class StoppingRuleSettings(BaseModel):
 class WithinIterationSettings(BaseModel):
     """Ranked-queue stopping inside one iteration (Callaghan and Mueller-Hansen 2020).
 
-    ``target`` is the recall required within each iteration's candidate queue and
-    ``alpha`` the significance level of the test that it has been reached.
+    ``target`` is the recall to be protected and ``alpha`` the significance level of the
+    test that it has been reached. On the version-2 benchmark (270 simulated reviews,
+    citation-structure ranking) the realised share of cuts made while recall was below
+    the target was 11.4% at alpha 0.05 and 5.2% at alpha 0.01, i.e. above alpha: use
+    0.01 where the per-iteration statement matters (validation/README_v2.md).
     """
 
     target: float = Field(0.95, gt=0, lt=1)
     alpha: float = Field(0.05, gt=0, lt=1)
     # "queue": recall within the current iteration's queue. "review": recall over every
     # record identified so far, pooling earlier iterations (see stopping/queue.py).
-    scope: Literal["queue", "review"] = "queue"
+    scope: Literal["queue", "review"] = "review"
 
 
 class StoppingSettings(BaseModel):

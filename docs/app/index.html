@@ -109,6 +109,19 @@ kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border
       <div><label for="maxit">Maximum iterations</label><input type="number" id="maxit" value="6" min="1" max="20"></div>
       <div><label for="budget">Screening budget (records, optional)</label><input type="number" id="budget" min="1" placeholder="no limit"></div>
     </div>
+    <div class="grid">
+      <div><label>Within-iteration stopping (version 2)</label>
+        <label class="inline"><input type="checkbox" id="wiOn" checked> allow leaving the tail of a ranked queue unscreened</label>
+        <small>Tests H0 "recall below 95%" after each decision, as in Callaghan and Müller-Hansen (2020). Screen from the top.</small></div>
+      <div><label for="wiAlpha">Significance level</label>
+        <select id="wiAlpha" style="font:inherit;padding:.45rem;border-radius:9px;border:1px solid var(--line);background:transparent;color:inherit">
+          <option value="0.05" selected>α = 0.05 (simulation: 19% less screening, 11% of cuts below target)</option>
+          <option value="0.01">α = 0.01 (simulation: 13% less screening, 5% of cuts below target)</option></select></div>
+      <div><label for="wiScope">Recall the test protects</label>
+        <select id="wiScope" style="font:inherit;padding:.45rem;border-radius:9px;border:1px solid var(--line);background:transparent;color:inherit">
+          <option value="review" selected>everything identified so far (saves more)</option>
+          <option value="queue">this iteration's queue only (stricter)</option></select></div>
+    </div>
     <p class="hint">The review stops when new inclusions dry up (fewer than 1 per 100 screened for two iterations), when
       the budget is reached, or when nothing is left to follow. A recall estimate is reported at every iteration as a
       diagnostic; it does not end the review.</p>
@@ -138,7 +151,7 @@ kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border
     <p class="hint">Ranked by similarity to what you have included so far. Records left undecided stay unscreened.</p>
     <div id="cands"></div>
     <div class="sticky row" style="justify-content:space-between">
-      <span id="tally" class="hint"></span>
+      <span><span id="tally" class="hint"></span><br><span id="queueBox" class="hint"></span></span>
       <div class="row"><button id="restExc">Exclude all undecided</button><button class="primary" id="submitBtn">Submit decisions</button></div></div>
   </section>
 
@@ -265,9 +278,10 @@ function buildConfig(){
   const email = $("email").value.trim() || null;
   const rules = [{type: "marginal_yield", eps: 0.01, k: 2}, {type: "exhaustion"}, {type: "estimated_recall", tau: 0.95}];
   const b = parseInt($("budget").value, 10); if (b > 0) rules.push({type: "budget", max_screened: b});
+  const stopping = {mode: "any_of", rules};
+  if ($("wiOn").checked) stopping.within_iteration = {target: 0.95, alpha: parseFloat($("wiAlpha").value), scope: $("wiScope").value};
   return {run: {directions: dirs, max_iterations: parseInt($("maxit").value, 10) || 6},
-          providers: {openalex: {mailto: email}, crossref: {mailto: email}},
-          stopping: {mode: "any_of", rules}};
+          providers: {openalex: {mailto: email}, crossref: {mailto: email}}, stopping};
 }
 $("startBtn").onclick = () => guarded("resolving the seed studies", async () => {
   const seeds = $("seeds").value; if (!seeds.trim()) throw new Error("paste at least one DOI");
@@ -303,15 +317,31 @@ async function nextIteration(){
       <div class="choice"><button class="inc" aria-pressed="false" data-d="include">Include</button><button class="exc" aria-pressed="false" data-d="exclude">Exclude</button></div>
     </div>`).join("");
   hideTabs(); $("screen").classList.remove("hidden"); $("state").classList.add("hidden");
-  setFocus(0); tally(); $("screen").scrollIntoView({behavior: "smooth"});
+  $("submitBtn").textContent = "Submit decisions"; wiConfigured = !!(await call("status")).within_iteration;
+  setFocus(0); tally(); queueCheck(); $("screen").scrollIntoView({behavior: "smooth"});
 }
 function decide(i, d){ const c = cands[i]; decisions[c.key] = decisions[c.key] === d ? undefined : d;
   const el = $("cands").children[i]; el.querySelector(".inc").setAttribute("aria-pressed", decisions[c.key] === "include");
-  el.querySelector(".exc").setAttribute("aria-pressed", decisions[c.key] === "exclude"); tally(); }
+  el.querySelector(".exc").setAttribute("aria-pressed", decisions[c.key] === "exclude"); tally(); queueCheck(); }
 function setFocus(i){ const ch = $("cands").children; if (!ch.length) return; focus = Math.max(0, Math.min(ch.length - 1, i));
   for (const e of ch) e.classList.remove("focus"); ch[focus].classList.add("focus"); ch[focus].scrollIntoView({block: "nearest"}); }
 function tally(){ const v = Object.values(decisions); const inc = v.filter(x => x === "include").length, exc = v.filter(x => x === "exclude").length;
   $("tally").textContent = `${inc} included, ${exc} excluded, ${cands.length - inc - exc} undecided`; }
+let qtTimer = null, wiConfigured = false;
+function queueCheck(){
+  if (!wiConfigured) { $("queueBox").textContent = ""; return; }
+  clearTimeout(qtTimer);
+  qtTimer = setTimeout(async () => {
+    const d = Object.fromEntries(Object.entries(decisions).filter(([, v]) => v));
+    try {
+      const r = await call("queue_test", {decisions: d});
+      if (!r) { $("queueBox").textContent = ""; return; }
+      $("queueBox").innerHTML = (r.stop && r.n_remaining > 0
+        ? '<span class="badge ok">you may stop</span> ' : "") + esc(r.rationale);
+      $("submitBtn").textContent = r.stop && r.n_remaining > 0 ? `Submit, leave ${r.n_remaining} unscreened` : "Submit decisions";
+    } catch (e) { $("queueBox").textContent = ""; }
+  }, 120);
+}
 $("cands").addEventListener("click", e => { const row = e.target.closest(".cand"); if (!row) return; const i = +row.dataset.i;
   if (e.target.dataset.d) decide(i, e.target.dataset.d); else if (!e.target.closest("a")) row.classList.toggle("open"); setFocus(i); });
 document.addEventListener("keydown", e => {
@@ -359,7 +389,21 @@ $("reportBtn").onclick = () => guarded("writing the report", async () => {
     : esc((est && (est.reason || est.error || (est.warnings || []).join("; "))) || "not estimable with these sources");
   $("reportOut").innerHTML = `<h2 style="font-size:1rem;margin-top:1.2rem">PRISMA 2020, citation searching</h2><div id="prisma">${rep["prisma.svg"] || ""}</div>
     <p class="hint">Recall estimate (a diagnostic, not a stopping criterion): ${estText}</p>
-    <div class="row">${files.map(f => `<button data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>`;
+    <div class="row">${files.map(f => `<button data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>
+    <h2 style="font-size:1rem;margin-top:1.2rem">Recall of the whole search (database + citation searching)</h2>
+    <p class="hint">Upload the studies you included from your database search (CSV export with a DOI column, RIS, or one DOI per line).
+      The two methods are then used as independent capture arms; seeds are set aside.</p>
+    <div class="row"><button type="button" id="dbPick">Choose file</button></div><div id="dbOut"></div>`;
+  $("dbPick").onclick = () => { $("filePick").accept = ".csv,.ris,.txt"; $("filePick").onchange = () => { const f = $("filePick").files[0];
+    $("filePick").value = ""; $("filePick").accept = ".zip,application/zip"; if (f) guarded("estimating recall of the whole search", async () => {
+      const r = await call("cross_method", {text: await f.text()});
+      $("dbOut").innerHTML = r.estimable
+        ? `<p><span class="badge ok">${(r.recall_combined*100).toFixed(1)}%</span> estimated recall of database and citation searching together
+            (95% interval ${(r.recall_combined_ci[0]*100).toFixed(1)}-${(r.recall_combined_ci[1]*100).toFixed(1)}%), from ${r.n_database} database and
+            ${r.n_citation} citation-search inclusions sharing ${r.m}. Citation searching alone: ${(r.recall_citation_only*100).toFixed(1)}%.</p>`
+          + (r.warnings.length ? `<p class="hint">${r.warnings.map(esc).join("<br>")}</p>` : "")
+        : `<p><span class="badge warn">not estimable</span> ${esc(r.reason || "")}</p>`;
+    }); }; $("filePick").click(); };
   $("reportOut").querySelectorAll("button[data-f]").forEach(b => b.onclick = () => download(b.dataset.f, rep[b.dataset.f], b.dataset.f.endsWith(".svg") ? "image/svg+xml" : "text/plain"));
   await autosave(await call("status"));
 });
