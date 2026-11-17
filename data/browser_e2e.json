@@ -1,0 +1,54 @@
+{
+ "console_errors": [],
+ "steps": [],
+ "boot_seconds": 7.4,
+ "version": "2.0.0",
+ "demo_rounds": [
+  {
+   "iteration": 1,
+   "candidates": 58,
+   "included": 33,
+   "queue_test": "The whole queue has been screened."
+  },
+  {
+   "iteration": 2,
+   "candidates": 115,
+   "included": 4
+  },
+  {
+   "iteration": 3,
+   "candidates": 7,
+   "included": 0
+  }
+ ],
+ "demo_final": "stopped: Frontier exhausted",
+ "demo_stats": "Seeds 3 Screened 183 Included 40 Iterations 3",
+ "demo_estimate_line": "Recall estimate (a diagnostic, not a stopping criterion): overlap m=0 below the minimum of 3; a capture-recapture estimate from near-zero overlap is not interpretable",
+ "cross_method_text": "not estimable point estimate 37.0 does not exceed the observed count 37; the arms are nested or uninformative, so recall cannot be estimated from them",
+ "demo_zip_bytes": 32628,
+ "verify_badge": "verified",
+ "verify_text": "verified All 7 recorded outputs were recomputed from the archived responses and match their hashes.",
+ "live_seconds_to_candidates": 1.3,
+ "live_candidates": 34,
+ "live_first_titles": [
+  "Systematic literature reviews in software engineering \u2013 A systematic literature ",
+  "Global software engineering and agile practices: a systematic review",
+  "Systematic literature reviews in software engineering \u2013 A tertiary study"
+ ],
+ "live_final": "continuing",
+ "live_rules": "Marginal yield\tnot met\t/ 0.010\tFewer than 2 iterations completed; rule not yet applicable.\nFrontier exhausted\tnot met\t5.000 / 0.000\t5 studies remain to be expanded.\nEstimated recall\tnot met\t/ 0.950\tRecall not estimable: point estimate 5.0 does not exceed the observed count 5; the arms are nested or uninformative, so recall cannot be estimated from them",
+ "cli_verification": {
+  "demo_run.zip": {
+   "ok": true,
+   "artifacts_checked": 7,
+   "mismatched": [],
+   "error": null
+  },
+  "live_run.zip": {
+   "ok": true,
+   "artifacts_checked": 1,
+   "mismatched": [],
+   "error": null
+  }
+ }
+}

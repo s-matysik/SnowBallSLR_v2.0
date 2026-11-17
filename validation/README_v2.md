@@ -54,7 +54,7 @@ Design and criterion fixed before the run in `PREREGISTRATION_pillar_A.md`
 
 ## Result in one line each
 
-- Pillar B, alpha 0.05, scope review: median 19.3% less screening, mean recall loss 0.42 points,
-  11.4% of cuts below target; alpha 0.01: 13.2%, 0.29 points, 5.2%.
+- Pillar B, alpha 0.05, scope review: median 19.2% less screening, mean recall loss 0.42 points,
+  11.4% of cuts below target; alpha 0.01: 13.1%, 0.29 points, 5.2%.
 - Pillar A, rho 0.3, chase to exhaustion: Chapman coverage 95.6% (809 of 810 estimable), median
   relative bias +0.3%: GO.
