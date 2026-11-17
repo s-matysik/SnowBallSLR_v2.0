@@ -67,14 +67,14 @@ class QueueTest:
     def rationale(self) -> str:
         if self.n_screened == 0:
             return "Nothing screened in this iteration yet."
+        if self.n_remaining == 0:
+            return "The whole queue has been screened."
         if self.stop:
             return (
                 f"H0 'recall within this iteration's queue is below {self.target:.0%}' rejected "
                 f"(p = {self.p_min:.3g} < {self.alpha}); the remaining {self.n_remaining} "
                 f"of {self.n_queue} candidates may be left unscreened."
             )
-        if self.n_remaining == 0:
-            return "The whole queue has been screened."
         return (
             f"H0 'recall within this iteration's queue is below {self.target:.0%}' not rejected "
             f"(p = {self.p_min:.3g}, needs < {self.alpha}); keep screening."

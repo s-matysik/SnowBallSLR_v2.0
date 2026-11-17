@@ -415,6 +415,9 @@ class Run:
         res = queue_test(prefix, len(order), target=settings.target, alpha=settings.alpha,
                          prior_relevant=prior_rel, prior_unseen=prior_unseen).to_dict()
         res.update(scope=settings.scope, prior_relevant=prior_rel, prior_unseen=prior_unseen)
+        if settings.scope == "review":
+            res["rationale"] = res["rationale"].replace(
+                "recall within this iteration's queue", "recall over the records identified so far")
         if n_decided != len(prefix):
             res.update(stop=False, rationale=(
                 f"{n_decided - len(prefix)} record(s) were screened out of rank order; the "

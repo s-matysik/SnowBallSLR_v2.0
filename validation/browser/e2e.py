@@ -121,7 +121,7 @@ try:
         page.click("#reportBtn")
         idle(page)
         page.wait_for_selector("#prisma svg", timeout=30_000)
-        note("demo_estimate_line", page.locator("#reportOut p.hint").inner_text())
+        note("demo_estimate_line", page.locator("#reportOut p.hint").first.inner_text())
         # Cross-method recall: half of the relevant demo records as "database inclusions".
         gold = (Path(a.site) / "app" / "demo" / "mini_gold.csv").read_text().split()[1:]
         db_file = out / "database_included.csv"
