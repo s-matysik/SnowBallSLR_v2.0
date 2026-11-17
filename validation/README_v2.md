@@ -60,3 +60,17 @@ Design and criterion fixed before the run in `PREREGISTRATION_pillar_A.md`
   11.4% of cuts below target; alpha 0.01: 13.1%, 0.29 points, 5.2%.
 - Pillar A, rho 0.3, chase to exhaustion: Chapman coverage 95.6% (809 of 810 estimable), median
   relative bias +0.3%: GO.
+
+## Live-data replay (version-1 reviews)
+
+`live_queue_replay.csv`: the within-iteration rule (target 0.95) replayed on iteration 1 of the three version-1 reviews with their
+recorded ranking and screening decisions. queue_size counts every candidate, screened_in_rank_order those decided (mid and large were
+budget-limited, so their tail is unseen); oracle_* is the screening an oracle stopping at exactly 95% of the screened inclusions needs.
+
+`live_crossmethod_adverse_records.csv`: the adverse review's Scopus export (260 records, the source of all 15 seeds), one row per record:
+Scopus EID, DOI, scores of the version-1 screening models (claude-haiku-4-5 gate >= 5, then claude-opus-4-8; claude-sonnet-5 could not be
+run, so the decision rule is the mean of the two available models >= 7, applied identically to the citation arm), whether the record is
+among the citation-search inclusions, and the chase iteration in which the crawl reached it. Abstracts are not redistributed.
+On version-1 records scored by all three models, the two-model rule agrees with the recorded decision for 93.2% (adverse).
+`live_crossmethod_adverse_summary.csv`: the Chapman result; overlap m = 0, so the library refuses the estimate.
+Scopus retrieval for the three queries (Scopus Search API, 17 November 2026) is in scopus_database_search.json (metadata only).

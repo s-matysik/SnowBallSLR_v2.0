@@ -1,0 +1,3 @@
+label,n_database,n_citation,m,observed,n_hat,ci,estimable,reason
+primary: haiku+opus rule on both arms,56,177,0,233,,,False,overlap m=0 below the minimum of 3; a capture-recapture estimate from near-zero overlap is not interpretable
+sensitivity: citation arm = recorded 3-model decisions,56,149,0,205,,,False,overlap m=0 below the minimum of 3; a capture-recapture estimate from near-zero overlap is not interpretable
