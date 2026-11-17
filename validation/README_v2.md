@@ -31,7 +31,9 @@ decisions.
 | records_left_unscreened | candidates left unscreened at those cuts (some resurface later) |
 | cuts_below_target | cuts made while recall, in the scope tested, was below the 0.95 target |
 
-`queue_stopping_paired_summary.csv` holds the paired summary reported in the article.
+`queue_stopping_paired_summary.csv` holds the paired summary reported in the article. Savings are over 269
+reviews: in one (diffuse, graph 5, 5 seeds, draw 3) the seeds have no citation links, so every variant
+screens 0 records and the saving is undefined; recall figures use all 270.
 
 ## Cross-method recall estimation (pillar A)
 
