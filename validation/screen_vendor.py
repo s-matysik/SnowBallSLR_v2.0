@@ -1,12 +1,20 @@
+# ruff: noqa: E701, E702
 """Score SYNERGY+ records with one model through an OpenAI-compatible or Gemini API.
     VENDOR=... MODEL=... API_KEY=... python screen_vendor.py SET.json PROMPT.txt OUT.json
 Resumable: scores already in OUT.json are kept."""
-import json, os, re, sys, time, urllib.request, urllib.error
+import json
+import os
+import re
+import sys
+import time
+import urllib.error
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 SET, PROMPT, OUT = json.loads(Path(sys.argv[1]).read_text()), Path(sys.argv[2]).read_text(), Path(sys.argv[3])
 V, M, K = os.environ["VENDOR"], os.environ["MODEL"], os.environ["API_KEY"]
-BASE = {"DEEPSEEK": "https://api.deepseek.com/v1", "KIMI": "https://api.moonshot.ai/v1", "OPENAI": "https://api.openai.com/v1"}
+BASE = {"DEEPSEEK": "https://api.deepseek.com/v1", "KIMI": "https://api.moonshot.ai/v1", "OPENAI": "https://api.openai.com/v1", "XAI": "https://api.x.ai/v1"}
 BATCH = 20
 S = json.loads(OUT.read_text()) if OUT.exists() else {}
 def call(prompt):
@@ -28,7 +36,7 @@ def call(prompt):
             msg = e.read()[:200]
             if e.code in (429, 500, 502, 503, 504): time.sleep(5 * 2 ** a); continue
             return "ERROR " + str(e.code) + " " + msg.decode("utf8", "replace")
-        except Exception as e:
+        except Exception:
             time.sleep(5 * 2 ** a)
     return "ERROR retries"
 def parse(t, n):
@@ -47,7 +55,7 @@ def job(args):
     items = "\n\n".join(f"[{i}] TITLE: {r['title']}\nABSTRACT: {r['abstract'][:1500]}" for i, r in enumerate(recs))
     t = call(PROMPT.format(title=meta["title"], criteria=meta["criteria"] or "(not stated; use the review title)", items=items))
     return recs, parse(t, len(recs)), t[:200] if t.startswith("ERROR") else ""
-for attempt in range(3):
+for _attempt in range(3):
     jobs = []
     for rv, meta in SET["reviews"].items():
         todo = [r for r in SET["records"] if r["review"] == rv and r["doi"] not in S]

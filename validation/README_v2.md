@@ -101,6 +101,7 @@ from the database arm): arm sizes, overlap m, observed, truth (inclusions other 
 relative bias, estimated and true recall of the search. Supplementary material, Section S7.
 
 `synergy_screening_scores.csv`: 1,101 records from six reviews (all inclusions with a Scopus abstract plus 150 random
-exclusions each): DOI, the authors' final decision and the 0-10 score of each model (validation/screen_prompt.txt; OpenAI models
-through validation/screen_vendor.py). `synergy_screening_metrics.csv`: AUC, sensitivity, specificity and WSS pooled (review = all)
+exclusions each): DOI, the authors' final decision and the 0-10 score of each of 11 models from Anthropic, OpenAI, Google, DeepSeek and xAI (validation/screen_prompt.txt,
+validation/screen_vendor.py; analysis validation/compare_vendors.py). `synergy_screening_per_review.csv`, `_paired_differences.csv`
+(bootstrap, Holm-adjusted) and `_kappa.csv` support Table S9 and Fig. S4. `synergy_screening_metrics.csv`: AUC, sensitivity, specificity and WSS pooled (review = all)
 and per review. Section S8.
