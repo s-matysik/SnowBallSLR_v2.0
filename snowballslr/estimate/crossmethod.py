@@ -11,7 +11,11 @@ crawl never saw them.
 Validation (validation/validation_crossmethod.py, pre-registered in
 validation/PREREGISTRATION_pillar_A.md): over 810 simulated reviews with moderate
 dependence between the arms, the Chapman interval contained the true population in
-95.6% of reviews and the median relative bias was +0.3%.
+95.6% of reviews and the median relative bias was +0.3%. On real reviews with known inclusions
+(validation/validation_synergy_crossmethod.py; 21 SYNERGY+ reviews, Scopus) the median bias was
+-3.9% but the interval covered the truth in only 62% of estimates: both methods favour
+well-connected studies, so the population, and hence the share still missing, is underestimated.
+Treat the recall as optimistic and the estimated number of missing studies as a minimum.
 
 Seeds normally come from the database search, so they belong to the database arm and
 cannot be "found" by citation searching. They are therefore removed from both arms
@@ -127,6 +131,8 @@ def cross_method_estimate(
             recall_combined_ci=[round(observed / hi, 4), round(min(1.0, observed / lo), 4)],
             recall_citation_only=round(n2 / est.n_hat, 4),
             recall_database_only=round(n1 / est.n_hat, 4),
-            validated="Chapman interval coverage 95.6%, median bias +0.3% (810 simulated reviews)",
+            validated=("simulation: interval coverage 95.6%, median bias +0.3% (810 reviews); real reviews with known "
+                       "inclusions: coverage 62%, median bias -3.9% (77 estimates, "
+                       "21 SYNERGY+ reviews) - recall tends to be overestimated"),
         )
     return out

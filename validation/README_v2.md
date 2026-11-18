@@ -92,3 +92,15 @@ inclusions; recall = found / n_target; recall_of_reachable = found / reachable; 
 simulation benchmark. `synergy_scopus_summary.csv`: Table S7. `synergy_scopus_per_review.csv`: per-review means (Fig. S2a), with
 edges_within (citation links between inclusions) and linked (inclusions linked to at least one other). The Scopus graphs are not
 redistributed; validation/synergy_scopus_crawl.py rebuilds them (Scopus API key required). Supplementary material, Section S6.
+
+## SYNERGY+: cross-method estimate and screening models
+
+`synergy_database_searches.json`: for 28 SYNERGY+ reviews, the Scopus query built from the review title and eligibility criteria
+(rule in the file), the hit count and the included studies it retrieves. `synergy_crossmethod.csv`: one row per review x draw (seeds
+from the database arm): arm sizes, overlap m, observed, truth (inclusions other than seeds), Chapman N-hat and interval, coverage,
+relative bias, estimated and true recall of the search. Supplementary material, Section S7.
+
+`synergy_screening_scores.csv`: 1,101 records from six reviews (all inclusions with a Scopus abstract plus 150 random
+exclusions each): DOI, the authors' final decision and the 0-10 score of each model (validation/screen_prompt.txt; OpenAI models
+through validation/screen_vendor.py). `synergy_screening_metrics.csv`: AUC, sensitivity, specificity and WSS pooled (review = all)
+and per review. Section S8.

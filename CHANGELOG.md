@@ -73,4 +73,13 @@ All notable changes since the version described in SoftwareX 36 (2026) 103116.
   random sequence is unchanged, so every published benchmark figure is reproduced as before.
 
 ### Removed
-- `rapidfuzz` as a runtime dependency (kept in the `dev` extra as a test reference).
+- `rapidfuzz` as a runtime dependency (kept in the `dev` extra as a test reference).## 2.0.1
+
+### Changed
+
+- Cross-method recall: the result's `validated` field and the documentation now report the real-data
+  study (`validation/validation_synergy_crossmethod.py`, 21 SYNERGY+ reviews with Scopus searches and citation
+  graphs): median bias -3.9%, interval coverage 62%. The estimate is optimistic on real data.
+- Real-data benchmark of the within-iteration rule on 28 SYNERGY+ reviews (`validation/validation_synergy_scopus.py`).
+
+

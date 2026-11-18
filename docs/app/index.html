@@ -398,7 +398,7 @@ $("reportBtn").onclick = () => guarded("writing the report", async () => {
     $("filePick").value = ""; $("filePick").accept = ".zip,application/zip"; if (f) guarded("estimating recall of the whole search", async () => {
       const r = await call("cross_method", {text: await f.text()});
       $("dbOut").innerHTML = r.estimable
-        ? `<p><span class="badge ok">${(r.recall_combined*100).toFixed(1)}%</span> estimated recall of database and citation searching together
+        ? `<p><span class="badge ok">${(r.recall_combined*100).toFixed(1)}%</span> estimated recall of database and citation searching together (on real reviews this estimate is optimistic)
             (95% interval ${(r.recall_combined_ci[0]*100).toFixed(1)}-${(r.recall_combined_ci[1]*100).toFixed(1)}%), from ${r.n_database} database and
             ${r.n_citation} citation-search inclusions sharing ${r.m}. Citation searching alone: ${(r.recall_citation_only*100).toFixed(1)}%.</p>`
           + (r.warnings.length ? `<p class="hint">${r.warnings.map(esc).join("<br>")}</p>` : "")

@@ -44,8 +44,12 @@ snowballslr estimate ./run --database included_from_scopus.csv    # CSV with a D
 The database search and citation searching then act as two capture arms from different discovery
 processes, seeds set aside. In a pre-registered simulation (`validation/PREREGISTRATION_pillar_A.md`,
 810 reviews) the Chapman interval contained the true population in 95.6% of reviews with a median
-bias of +0.3%; version 1's provider arms reached 0%. The browser app offers the same as an upload
-in the report view.
+bias of +0.3%; version 1's provider arms reached 0%. On 21 real reviews with known inclusions (SYNERGY+
+with Scopus, `validation/validation_synergy_crossmethod.py`) the median bias was -3.9% but the interval
+covered the truth in only 62% of estimates, and the number of missing studies was underestimated
+(531 estimated against 816). Read the recall as optimistic and the missing count as a
+minimum; a refusal for too little overlap is itself a warning (median true recall in those runs
+58%). The browser app offers the same as an upload in the report view.
 
 **Also:** OpenAlex API key through `OPENALEX_API_KEY` (wire-only, never written into a run; without a
 key OpenAlex no longer pages forward citations past the first 200), a pure-Python Jaro-Winkler that

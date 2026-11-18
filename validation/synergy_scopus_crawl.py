@@ -116,7 +116,8 @@ def crawl(review, ids_csv, out_dir):
     dst = out_dir / f"{review}.json"
     if dst.exists():
         return review, "skipped"
-    rows = list(csv.DictReader(open(ids_csv, encoding="utf-8")))
+    with open(ids_csv, encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
     inc = {norm_doi(r["doi"]) for r in rows if r["label_included"] == "1" and r["doi"]}
     allrec = {norm_doi(r["doi"]) for r in rows if r["doi"]}
     m = map_dois(inc)

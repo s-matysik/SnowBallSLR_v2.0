@@ -1,0 +1,10 @@
+You are screening records (title and abstract) for a systematic review.
+
+Review: {title}
+Eligibility criteria: {criteria}
+
+For each record below give an integer score from 0 to 10 for how likely it is that the study would be INCLUDED after full-text review under these criteria (0 = clearly irrelevant, 10 = clearly meets all criteria).
+
+{items}
+
+Return ONLY a JSON object mapping each record index to its integer score, e.g. {{"0": 7, "1": 2}}. No prose.
