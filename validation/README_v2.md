@@ -82,3 +82,13 @@ work key, rank, DOI, claude-haiku-4-5 and claude-opus-4-8 scores, the two-model 
 whether the record is one of the 56 database (Scopus export) inclusions. `live_iter2_adverse_trajectory.csv`: the Chapman estimate
 (database arm 56 inclusions; citation arm iteration 1 plus iteration-2 inclusions screened so far) after 0, 1,000, 2,500, 5,000,
 7,500 and 10,000 iteration-2 records. Supplementary material, Section S5.
+
+## SYNERGY+ reviews on their Scopus citation graph
+
+`synergy_scopus_benchmark.csv`: one row per review x draw x variant (28 SYNERGY+ reviews, five draws of five included seeds,
+variants full / review_0.05 / review_0.01). Truth = the review authors' own inclusions; candidates the review never screened count
+as excluded. n_target = inclusions other than seeds; reachable = inclusions reachable from the seeds through citation links among
+inclusions; recall = found / n_target; recall_of_reachable = found / reachable; records_left_unscreened and cuts_below_target as in the
+simulation benchmark. `synergy_scopus_summary.csv`: Table S7. `synergy_scopus_per_review.csv`: per-review means (Fig. S2a), with
+edges_within (citation links between inclusions) and linked (inclusions linked to at least one other). The Scopus graphs are not
+redistributed; validation/synergy_scopus_crawl.py rebuilds them (Scopus API key required). Supplementary material, Section S6.

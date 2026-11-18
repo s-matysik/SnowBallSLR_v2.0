@@ -1,0 +1,4 @@
+variant,runs,recall_median,recall_mean,reachable_share_median,recall_of_reachable_median,recall_of_reachable_p10,screened_median,stopped_by,saving_median,saving_p10,saving_p90,records_left_unscreened_share,recall_change_mean,recall_loss_max,runs_losing,runs_gaining,queues_cut,cuts_below_target
+full (version 1),140,0.5092,0.4356,0.5478,1.0,0.7736,1348.5,marginal_yield:103;exhaustion:37,,,,,,,,,,
+review_0.05,140,,,,,,,,0.0358,0.0074,0.089,0.0658,0.0034,0.02,4.0,4.0,312.0,0.0
+review_0.01,140,,,,,,,,0.0069,0.0,0.0418,0.0289,0.0034,0.0141,3.0,3.0,213.0,0.0
