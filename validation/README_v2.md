@@ -74,3 +74,11 @@ among the citation-search inclusions, and the chase iteration in which the crawl
 On version-1 records scored by all three models, the two-model rule agrees with the recorded decision for 93.2% (adverse).
 `live_crossmethod_adverse_summary.csv`: the Chapman result; overlap m = 0, so the library refuses the estimate.
 Scopus retrieval for the three queries (Scopus Search API, 17 November 2026) is in scopus_database_search.json (metadata only).
+
+## Live data: adverse review, iteration 2
+
+`live_iter2_adverse_records.csv`: ranks 1-10,000 of the adverse review's iteration-2 queue (31,486 candidates, version-1 ranking):
+work key, rank, DOI, claude-haiku-4-5 and claude-opus-4-8 scores, the two-model decision (mean >= 7 after the haiku gate >= 5) and
+whether the record is one of the 56 database (Scopus export) inclusions. `live_iter2_adverse_trajectory.csv`: the Chapman estimate
+(database arm 56 inclusions; citation arm iteration 1 plus iteration-2 inclusions screened so far) after 0, 1,000, 2,500, 5,000,
+7,500 and 10,000 iteration-2 records. Supplementary material, Section S5.
