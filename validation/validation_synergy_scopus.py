@@ -83,7 +83,7 @@ def config(alpha):
     return Config.model_validate(d)
 
 
-def one(raw, draw, variant, alpha):
+def one(raw, draw, variant, alpha, every=5):
     graph = build_graph(raw)
     gold = {key(e) for e in raw["included_mapped"]}
     seeds = sorted(random.Random(f"{raw['review']}|{draw}").sample(sorted(gold), SEEDS))
@@ -104,7 +104,7 @@ def one(raw, draw, variant, alpha):
                 decided, stop_at = {}, len(order)
                 for j, k in enumerate(order):
                     decided[k] = "include" if k in gold else "exclude"
-                    if j + 1 < len(order) and (j + 1) % 5 == 0 and run.queue_test(decided)["stop"]:
+                    if j + 1 < len(order) and (j + 1) % every == 0 and run.queue_test(decided)["stop"]:
                         stop_at = j + 1
                         break
                 if stop_at < len(order):
@@ -142,12 +142,17 @@ def main():
     ap.add_argument("out")
     ap.add_argument("--shard", default="0/1")
     ap.add_argument("--draws", type=int, default=DRAWS)
+    ap.add_argument("--check-every", type=int, default=5, help="evaluate the rule after every N decisions (the published benchmark uses 5; the application uses 1)")
+    ap.add_argument("--variants", default="", help="comma-separated subset, e.g. review_0.05")
     a = ap.parse_args()
     raws = [json.loads(p.read_text()) for p in sorted(Path(a.raw).glob("*.json"))]
     jobs = [(r, d, v, al) for r in raws if len(r["included_mapped"]) > SEEDS + 5
             for d in range(a.draws) for v, al in VARIANTS]
     i, n = (int(x) for x in a.shard.split("/"))
-    rows = [one(*j) for j in jobs[i::n]]
+    if a.variants:
+        keep = set(a.variants.split(","))
+        jobs = [j for j in jobs if (j[2] if j[3] is None else f"{j[2]}_{j[3]}") in keep]
+    rows = [one(*j, every=a.check_every) for j in jobs[i::n]]
     with open(a.out, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=FIELDS)
         w.writeheader()

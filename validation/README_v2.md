@@ -119,3 +119,12 @@ and per review. Section S8.
   per-review values are in `data/synergy_screening_per_review.csv`. Not every CSV has one row per simulated run.
 - Holm adjustment: over the 27 distinct pairs formed by the three reference models with the other eight models
   and with each other; a bootstrap p of zero is floored at 1/2000.
+
+## Additions in 2.0.4
+
+- `data/queue_stopping_check_every1.csv` (270 rows, same columns as `queue_stopping_benchmark.csv`, variant `review`,
+  alpha 0.05) and `data/synergy_scopus_check_every1.csv` (280 rows, same columns as `synergy_scopus_benchmark.csv`,
+  variants `review_0.05` and `review_0.01`): the review scope with the rule evaluated after every decision. Full
+  screening is the same run as in the N = 5 files, so savings are paired against it.
+  Reproduce with `--check-every 1` (`--variants review` for the simulation, `--variants review_0.05,review_0.01` for
+  the published reviews).

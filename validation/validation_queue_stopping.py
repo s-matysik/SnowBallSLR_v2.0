@@ -86,7 +86,7 @@ def config(variant: str, alpha: float = ALPHA) -> Config:
 
 
 def one(args):
-    regime, gseed, size, draw, seeds, variant, alpha = args
+    regime, gseed, size, draw, seeds, variant, alpha, every = args
     g = generate_graph(GraphSpec(seed=gseed, **REGIMES[regime]))
     gold = set(g["gold"])
     graph = neutral_graph(g)
@@ -110,7 +110,7 @@ def one(args):
             stop_at = len(order)
             for j, k in enumerate(order):
                 decided[k] = "include" if k in gold else "exclude"
-                if j + 1 < len(order) and (j + 1) % 5 == 0 and run.queue_test(decided)["stop"]:
+                if j + 1 < len(order) and (j + 1) % every == 0 and run.queue_test(decided)["stop"]:
                     stop_at = j + 1
                     break
             if stop_at < len(order):
@@ -148,8 +148,9 @@ def main():
     ap.add_argument("--shard", default="0/1")
     ap.add_argument("--alpha", type=float, default=ALPHA, help="sensitivity runs; the default is 0.05")
     ap.add_argument("--variants", default=",".join(VARIANTS))
+    ap.add_argument("--check-every", type=int, default=5, help="evaluate the rule after every N decisions (the published benchmark uses 5; the application uses 1)")
     a = ap.parse_args()
-    jobs = [(*c, v, a.alpha) for c in cells(a.quick) for v in a.variants.split(",")]
+    jobs = [(*c, v, a.alpha, a.check_every) for c in cells(a.quick) for v in a.variants.split(",")]
     i, n = (int(x) for x in a.shard.split("/"))
     rows = [one(j) for j in jobs[i::n]]
     rows.sort(key=lambda r: (r["regime"], r["graph_seed"], r["seed_size"], r["draw"],

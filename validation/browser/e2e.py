@@ -76,7 +76,7 @@ def screen_loop(page, include, max_rounds=12):
                 const hit = ({include})(r); r.querySelector(hit ? '.inc' : '.exc').click(); if (hit) k++; }}); return k; }}""")
             rounds.append({"iteration": int(page.inner_text("#itNo")), "candidates": n, "included": inc})
             if len(rounds) == 1:
-                page.wait_for_function("() => document.querySelector('#queueBox').textContent.length > 0",
+                page.wait_for_function("() => document.querySelector('#queueBox').textContent.length > 0 && !document.querySelector('#queueBox').textContent.startsWith('Evaluating')",
                                        timeout=30_000)
                 rounds[-1]["queue_test"] = page.inner_text("#queueBox")[:200]
                 page.screenshot(path=str(out / "screen.png"), full_page=False)
@@ -181,7 +181,7 @@ except Exception as exc:
     res["traceback_tail"] = traceback.format_exc()[-900:]
     try:
         page.screenshot(path=str(out / "failure.png"), full_page=True)
-        res["page_log"] = page.inner_text("#log")[-600:]
+        res["page_log"] = (page.text_content("#log") or "")[-600:]
         res["queue_box"] = page.inner_text("#queueBox")[:300]
     except Exception:
         pass

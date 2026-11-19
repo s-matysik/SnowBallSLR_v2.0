@@ -76,11 +76,11 @@ kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border
 
   <section class="card" id="boot">
     <div class="row"><span class="badge" id="bootBadge">Starting</span><strong id="bootTitle">Preparing the Python runtime</strong></div>
-    <p class="hint">The first visit downloads the interpreter and scientific libraries (about 25 MB). Later visits start from the browser cache.</p>
+    <p class="hint" id="bootHint">The first visit downloads the interpreter and scientific libraries (about 25 MB). Later visits start from the browser cache.</p>
     <div class="bar"><i id="bar"></i></div>
     <ul class="steps" id="steps">
       <li>WebAssembly Python runtime</li><li>Numerical libraries</li><li>SnowBallSLR package</li></ul>
-    <div class="log" id="log" aria-live="polite"></div>
+    <details id="logDet" open><summary class="hint">Show technical details</summary><div class="log" id="log" aria-live="polite"></div></details>
   </section>
 
   <nav class="tabs hidden" id="tabs" role="tablist">
@@ -91,8 +91,10 @@ kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border
 
   <section class="card hidden" id="tab-start">
     <h2>Start a review</h2>
-    <p class="hint">Paste the DOIs (or OpenAlex IDs) of studies you already know belong in the review, one per line.
-      New to this? <button id="demoBtn" type="button">Try the offline demo</button></p>
+    <div class="row" style="margin:.2rem 0 .6rem"><button id="demoBtn" type="button" class="primary">Try the offline demo</button>
+      <small>No network, no account: a small frozen citation graph with three seed studies.</small></div>
+    <p class="hint" id="demoNote" style="display:none"><strong>Demo loaded.</strong> Select <em>Find candidates</em> below to start screening.</p>
+    <p class="hint">Or paste the DOIs (or OpenAlex IDs) of studies you already know belong in the review, one per line.</p>
     <label for="seeds">Seed studies</label>
     <textarea id="seeds" placeholder="10.1145/2601248.2601268&#10;10.1186/s13643-020-01521-4"></textarea>
     <div class="grid">
@@ -112,7 +114,7 @@ kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border
     <div class="grid">
       <div><label>Within-iteration stopping (version 2)</label>
         <label class="inline"><input type="checkbox" id="wiOn" checked> allow leaving the tail of a ranked queue unscreened</label>
-        <small>Tests H0 "recall below 95%" after each decision, as in Callaghan and Müller-Hansen (2020). Screen from the top.</small></div>
+        <small>Tests H0 "recall below 95%" after each decision, as in Callaghan and Müller-Hansen (2020). Screen from the top. The simulation figures below evaluated the test after every fifth decision; evaluating after every decision gave nearly the same result (supplement S2).</small></div>
       <div><label for="wiAlpha">Significance level</label>
         <select id="wiAlpha" style="font:inherit;padding:.45rem;border-radius:9px;border:1px solid var(--line);background:transparent;color:inherit">
           <option value="0.05" selected>α = 0.05 (simulation: 19% less screening, 11% of cuts below target)</option>
@@ -297,6 +299,7 @@ $("demoBtn").onclick = () => guarded("loading the offline demo", async () => {
   const keys = (await (await fetch("demo/mini_gold.csv")).text()).trim().split("\n").slice(1).map(s => s.trim()).filter(Boolean);
   $("seeds").value = keys.sort().slice(0, 3).join("\n");
   log("demo: a small frozen citation graph, no network. Records whose DOI contains 'gold' are the relevant ones. Press Find candidates.");
+  $("demoNote").style.display = "";
 });
 
 // ---- screening ---------------------------------------------------------------------------
@@ -327,20 +330,22 @@ function setFocus(i){ const ch = $("cands").children; if (!ch.length) return; fo
   for (const e of ch) e.classList.remove("focus"); ch[focus].classList.add("focus"); ch[focus].scrollIntoView({block: "nearest"}); }
 function tally(){ const v = Object.values(decisions); const inc = v.filter(x => x === "include").length, exc = v.filter(x => x === "exclude").length;
   $("tally").textContent = `${inc} included, ${exc} excluded, ${cands.length - inc - exc} undecided`; }
-let qtTimer = null, wiConfigured = false;
+let qtTimer = null, wiConfigured = false, qtSeq = 0;
 function queueCheck(){
   if (!wiConfigured) { $("queueBox").textContent = ""; return; }
   clearTimeout(qtTimer);
+  const seq = ++qtSeq; $("queueBox").textContent = "Evaluating the stopping test...";
   qtTimer = setTimeout(async () => {
     const d = Object.fromEntries(Object.entries(decisions).filter(([, v]) => v));
     try {
       const r = await call("queue_test", {decisions: d});
+      if (seq !== qtSeq) return;
       if (!r) { $("queueBox").textContent = ""; return; }
       $("queueBox").innerHTML = (r.stop && r.n_remaining > 0
         ? '<span class="badge ok">you may stop</span> ' : "") + esc(r.rationale);
       $("submitBtn").textContent = r.stop && r.n_remaining > 0 ? `Submit, leave ${r.n_remaining} unscreened` : "Submit decisions";
-    } catch (e) { $("queueBox").textContent = ""; }
-  }, 120);
+    } catch (e) { if (seq === qtSeq) $("queueBox").textContent = ""; }
+  }, 60);
 }
 $("cands").addEventListener("click", e => { const row = e.target.closest(".cand"); if (!row) return; const i = +row.dataset.i;
   if (e.target.dataset.d) decide(i, e.target.dataset.d); else if (!e.target.closest("a")) row.classList.toggle("open"); setFocus(i); });
@@ -371,8 +376,9 @@ function renderState(st){
     .map(([k, v]) => `<div><small>${k}</small><div style="font-size:1.35rem;font-weight:700">${v}</div></div>`).join("");
   $("rules").innerHTML = (st.decisions || []).map(d => {
     const adv = d.detail && d.detail.advisory;
-    const badge = d.triggered ? (adv ? '<span class="badge warn">met, advisory</span>' : '<span class="badge ok">met</span>') : '<span class="badge">not met</span>';
-    return `<tr><td>${esc(RULE_NAMES[d.rule] || d.rule)}</td><td>${badge}</td><td class="mono">${fmt(d.value)}${d.threshold != null ? " / " + fmt(d.threshold) : ""}</td><td>${esc(d.rationale)}</td></tr>`;
+    const none = d.value === null || d.value === undefined;
+    const badge = d.triggered ? (adv ? '<span class="badge warn">met, advisory</span>' : '<span class="badge ok">met</span>') : none ? '<span class="badge warn">not estimable</span>' : '<span class="badge">not met</span>';
+    return `<tr><td>${esc(RULE_NAMES[d.rule] || d.rule)}</td><td>${badge}</td><td class="mono">${none ? "no estimate" : fmt(d.value) + (d.threshold != null ? " / " + fmt(d.threshold) : "")}</td><td>${esc(d.rationale)}</td></tr>`;
   }).join("") || `<tr><td colspan="4" class="hint">Rules are evaluated once the first iteration has been screened.</td></tr>`;
   $("nextBtn").classList.toggle("hidden", st.stopped);
   $("state").scrollIntoView({behavior: "smooth"});
@@ -392,7 +398,7 @@ $("reportBtn").onclick = () => guarded("writing the report", async () => {
     <div class="row">${files.map(f => `<button data-f="${esc(f)}">${esc(f)}</button>`).join("")}</div>
     <h2 style="font-size:1rem;margin-top:1.2rem">Recall of the whole search (database + citation searching)</h2>
     <p class="hint">Upload the studies you included from your database search (CSV export with a DOI column, RIS, or one DOI per line).
-      The two methods are then used as independent capture arms; seeds are set aside.</p>
+      The estimate uses the overlap between the two searches, with seeds set aside. If both searches tend to find the same studies, it can overestimate recall.</p>
     <div class="row"><button type="button" id="dbPick">Choose file</button></div><div id="dbOut"></div>`;
   $("dbPick").onclick = () => { $("filePick").accept = ".csv,.ris,.txt"; $("filePick").onchange = () => { const f = $("filePick").files[0];
     $("filePick").value = ""; $("filePick").accept = ".zip,application/zip"; if (f) guarded("estimating recall of the whole search", async () => {
@@ -452,6 +458,7 @@ $("savedDrop").onclick = async () => { if (confirm("Discard the review saved in 
     const v = await call("boot", {wheel: meta.wheel}, new Uint8Array(await wr.arrayBuffer()));
     $("ver").textContent = v; $("bootBadge").className = "badge ok"; $("bootBadge").textContent = "Ready";
     $("bootTitle").textContent = "Runtime ready: SnowBallSLR " + v; $("bar").style.width = "100%";
+    $("logDet").open = false; $("bootHint").classList.add("hidden"); $("steps").classList.add("hidden"); document.querySelector("#boot .bar").classList.add("hidden");
     for (const li of $("steps").children) li.className = "done";
     $("tabs").classList.remove("hidden"); $("startBtn").disabled = false;
     const saved = await refreshSaved();

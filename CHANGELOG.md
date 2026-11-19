@@ -2,6 +2,26 @@
 
 All notable changes since the version described in SoftwareX 36 (2026) 103116.
 
+## [2.0.4] - 2026-11-19
+
+### Changed
+- Browser application: the start-up log is collapsed once the runtime is ready ("Show technical details"); the offline
+  demo is a primary button with the next step stated beside the form; a rule that cannot be estimated is shown as
+  "not estimable" with "no estimate" instead of "not met"; the stopping-test text always belongs to the latest
+  decisions (earlier requests can no longer overwrite it, and "Evaluating the stopping test..." is shown meanwhile);
+  the wording about the cross-method arms no longer calls them independent; the within-iteration option states that the
+  simulation figures used evaluation after every fifth decision.
+- Browser test: waits for the final stopping-test text and reads the start-up log by text content.
+
+### Added
+- `--check-every N` for `validation/validation_queue_stopping.py` and `validation/validation_synergy_scopus.py`
+  (default 5, the setting of the published benchmark; the application evaluates after each decision, N = 1), and
+  `--variants` for the SYNERGY+ script.
+- `data/queue_stopping_check_every1.csv` and `data/synergy_scopus_check_every1.csv`: the review scope rerun with N = 1.
+  Simulation (270 reviews, alpha 0.05): median saving 19.6% against 19.2%, mean recall loss 0.43 against 0.42 points,
+  11.9% against 11.4% of cuts below target. Published reviews (140 draws): 328 against 312 early stops at alpha 0.05, none
+  below target, total screening reduced by 4.8% against 4.5%.
+
 ## [2.0.3] - 2026-11-19
 
 ### Changed
