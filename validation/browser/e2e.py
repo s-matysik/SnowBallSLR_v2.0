@@ -152,7 +152,7 @@ try:
         if a.live:
             # A narrow, high-density context so that the interface screenshots used in the article
             # stay legible at the width of a journal column.
-            ctx2 = browser.new_context(viewport={"width": 520, "height": 700}, device_scale_factor=2)
+            ctx2 = browser.new_context(viewport={"width": 520, "height": 780}, device_scale_factor=2)
             ctx2.route(f"{ORIGIN}/**", serve)
             page2 = ctx2.new_page()
             page2.on("console", lambda m: m.type == "error" and res["console_errors"].append(m.text[:300]))
@@ -173,7 +173,7 @@ try:
                 page2.screenshot(path=str(out / "live_screen.png"))
                 page2.evaluate("() => document.querySelectorAll('#cands .cand').forEach((r, i) => r.querySelector(i < 5 ? '.inc' : '.exc').click())")
                 page2.wait_for_function("() => document.querySelector('#queueBox').textContent.length > 0 && !document.querySelector('#queueBox').textContent.startsWith('Evaluating')", timeout=30_000)
-                page2.evaluate("() => window.scrollTo(0, 0)")
+                page2.evaluate("() => document.querySelector('#screen').scrollIntoView({block: 'start'})")
                 note("live_queue_text", page2.inner_text("#queueBox")[:300])
                 page2.screenshot(path=str(out / "fig_screen.png"))
                 page2.click("#submitBtn")
