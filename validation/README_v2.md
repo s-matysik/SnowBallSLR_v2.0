@@ -105,3 +105,17 @@ exclusions each): DOI, the authors' final decision and the 0-10 score of each of
 validation/screen_vendor.py; analysis validation/compare_vendors.py). `synergy_screening_per_review.csv`, `_paired_differences.csv`
 (bootstrap, Holm-adjusted) and `_kappa.csv` support Table S9 and Fig. S4. `synergy_screening_metrics.csv`: AUC, sensitivity, specificity and WSS pooled (review = all)
 and per review. Section S8.
+
+## Additions in 2.0.3
+
+- `data/synergy_label_mapping.csv`: for each of the 28 SYNERGY+ reviews, the author-labelled inclusions
+  (`label_included = 1` in the SYNERGY+ 3.1 label files), those with a DOI, distinct DOIs, those mapped to
+  Scopus by the crawl, and the non-seed reference set used in S6. Totals: 1,522 labelled, 1,489 with a DOI,
+  1,435 mapped; the crawl's identifier files held 1,476 distinct DOIs and the step from 1,489 to 1,476 is not
+  reconstructible from the retained files.
+- `validation/reproduce_screening_tables.py`: recomputes the pooled metrics and the paired differences of
+  supplement S8 from `data/synergy_screening_scores.csv` (agreement with the released metrics to 5e-5, the
+  rounding of the CSV). `data/synergy_screening_metrics.csv` has 12 rows: 11 models and the mean of their scores;
+  per-review values are in `data/synergy_screening_per_review.csv`. Not every CSV has one row per simulated run.
+- Holm adjustment: over the 27 distinct pairs formed by the three reference models with the other eight models
+  and with each other; a bootstrap p of zero is floored at 1/2000.

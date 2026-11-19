@@ -2,6 +2,18 @@
 
 All notable changes since the version described in SoftwareX 36 (2026) 103116.
 
+## [2.0.3] - 2026-11-19
+
+### Changed
+- Wording of the cross-method estimate (library docstring, README, application hint): on real reviews recall tended to be
+  overestimated and the missing count underestimated; these are observed tendencies, not bounds.
+- `CITATION.cff` repository-code points to this repository.
+
+### Added
+- `data/synergy_label_mapping.csv` (per-review label and mapping counts), `data/synergy_screening_paired_differences.csv`
+  (27 distinct pairs, Holm-adjusted), `validation/reproduce_screening_tables.py` (recomputes the S8 tables from the released scores).
+- The 11-model screening comparison, the real-data cross-method study and the SYNERGY+ benchmark (data and scripts).
+
 ## [2.0.2] - 2026-11-19
 
 ### Fixed
