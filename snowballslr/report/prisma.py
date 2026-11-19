@@ -32,6 +32,7 @@ class PrismaCounts:
     included: int = 0
     unresolved: int = 0
     not_screened: int = 0
+    not_screened_other: int = 0
     per_iteration: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -51,6 +52,10 @@ class PrismaCounts:
             # never decided later. Omitted when zero so version-1 outputs are unchanged.
             **({"records_not_screened_within_iteration_stop": self.not_screened}
                if self.not_screened else {}),
+            # Candidates left unscreened although the test had not been met (the reviewer
+            # ended the iteration). Kept apart so they are not reported as a rule-driven stop.
+            **({"records_not_screened_other": self.not_screened_other}
+               if self.not_screened_other else {}),
         }
 
 
@@ -94,8 +99,11 @@ def build_counts(state: RunState, audit_events: Sequence[Mapping[str, Any]] = ()
     )
     counts.included = len([k for k in state.included_keys if k not in seed_keys])
     counts.per_iteration = [s.to_dict() for s in state.history]
-    left = {k for qt in state.queue_tests for k in qt.get("left_unscreened", ())}
-    counts.not_screened = sum(1 for k in left if k not in state.decisions and k not in seed_keys)
+    left_stop = {k for qt in state.queue_tests if qt.get("stop") for k in qt.get("left_unscreened", ())}
+    left_other = {k for qt in state.queue_tests if not qt.get("stop") for k in qt.get("left_unscreened", ())}
+    counts.not_screened = sum(1 for k in left_stop if k not in state.decisions and k not in seed_keys)
+    counts.not_screened_other = sum(
+        1 for k in left_other - left_stop if k not in state.decisions and k not in seed_keys)
     return counts
 
 
@@ -150,6 +158,8 @@ def write_prisma_svg(path: str | Path, counts: PrismaCounts) -> Path:
         ),
         *([("Records not screened", f"within-iteration stopping rule n = {counts.not_screened}")]
           if counts.not_screened else []),
+        *([("Records not screened", f"iteration ended by the reviewer n = {counts.not_screened_other}")]
+          if counts.not_screened_other else []),
         ("Records screened", f"n = {counts.screened}"),
         ("Records excluded", f"n = {counts.excluded}"),
         ("Studies included in review", f"n = {counts.included}"),

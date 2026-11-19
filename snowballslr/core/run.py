@@ -342,6 +342,12 @@ class Run:
                 "intended."
             )
 
+        # The within-iteration test is evaluated on the decisions being submitted and
+        # BEFORE they are written to the state. Evaluated afterwards, the review scope would
+        # count this queue's own inclusions as earlier-iteration inclusions (prior_relevant),
+        # and the saved result would differ from the one the reviewer was shown.
+        qt = self.queue_test(decisions)
+
         n_included = 0
         for key in sorted(decisions):
             value = str(decisions[key]).strip().lower()
@@ -358,7 +364,6 @@ class Run:
             for k in sorted(decisions)
             if str(decisions[k]).strip().lower() == Decision.INCLUDE
         ]
-        qt = self.queue_test(decisions)
         if qt is not None and qt["n_remaining"] > 0:
             self.state.queue_tests.append({"iteration": self.state.iteration, **qt})
             self.audit.emit(self.state.iteration, "queue_test", **{

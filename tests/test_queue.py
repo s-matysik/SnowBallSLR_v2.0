@@ -115,7 +115,13 @@ def test_run_records_the_test_and_prisma_counts_the_skipped(tmp_path, graph, ora
     qt = run.state.queue_tests[0]
     assert qt["iteration"] == 1 and len(qt["left_unscreened"]) == len(cands) - k
     counts = build_counts(run.state).to_dict()
-    assert counts["records_not_screened_within_iteration_stop"] == len(cands) - k
+    # The skipped records are reported under the reason that applies: a met criterion,
+    # or the reviewer ending the iteration while the criterion was not yet met.
+    field = ("records_not_screened_within_iteration_stop" if qt["stop"]
+             else "records_not_screened_other")
+    assert counts[field] == len(cands) - k
+    assert (len(counts) and sum(counts.get(f, 0) for f in (
+        "records_not_screened_within_iteration_stop", "records_not_screened_other"))) == len(cands) - k
     saved = json.loads((tmp_path / "r" / "state.json").read_text())
     assert saved["queue_tests"][0]["n_queue"] == len(cands)
 

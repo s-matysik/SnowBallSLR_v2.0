@@ -2,6 +2,26 @@
 
 All notable changes since the version described in SoftwareX 36 (2026) 103116.
 
+## [2.0.2] - 2026-11-19
+
+### Fixed
+- The within-iteration test saved with a labelled batch (`state.queue_tests`, PRISMA counts) is now
+  evaluated on the batch being submitted, before the decisions are written to the state. Evaluated
+  afterwards, the review scope counted the queue's own inclusions as earlier-iteration inclusions
+  (`prior_relevant`), so the saved result could differ from the one shown to the reviewer
+  (worked case on the offline fixture: preview p = 0.235, not met; saved p = 0.041, met). The
+  published benchmarks decide stops through `Run.queue_test` before labelling and are unaffected:
+  the 420 SYNERGY+ runs and both simulation grids (270 reviews at alpha 0.05 and 0.01) were rerun
+  with this version and reproduce every recorded count exactly.
+- PRISMA now separates records left unscreened because the criterion was met
+  (`records_not_screened_within_iteration_stop`) from records left unscreened because the reviewer
+  ended the iteration with the criterion not met (`records_not_screened_other`).
+
+### Documentation
+- Supplement corrections: two cells of Table S4 and four of Table S2 were mis-rounded; the iteration-1
+  citation arm of the adverse review is 177 distinct records (two inclusion keys were duplicates merged
+  by identity resolution), so Table S6 was recomputed.
+
 ## [2.0.0] - 2026-11-17
 
 ### Added
